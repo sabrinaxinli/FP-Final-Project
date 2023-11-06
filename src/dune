@@ -1,0 +1,19 @@
+(library
+  (name lib)
+  (modules lib)
+  (libraries 
+    core))
+
+(executable
+  (name server)
+  (modules server)
+  (libraries
+    lib
+    core))
+
+(executable
+  (name client)
+  (modules client)
+  (libraries
+    lib
+    core))
