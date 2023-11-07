@@ -11,11 +11,21 @@
 (*                                                                           *)
 (*****************************************************************************)
 
+(* Placeholder type - TODO/FIXME *)
+type todo
+
 (* Player *)
 type player
 
 (* Game Scenario *)
-type action_card
+type action_card = {
+    player: player;
+    title: string;
+    adjudication_procedures: todo;
+    play_constraint: todo;
+    play_cost: int;
+    card_number: int;
+}
 type action_card_deck = action_card list
 
 type investment_card
