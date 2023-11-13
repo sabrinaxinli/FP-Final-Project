@@ -11,9 +11,6 @@
 (*                                                                           *)
 (*****************************************************************************)
 
-(* Placeholder type - TODO/FIXME *)
-type todo
-
 (* Player *)
 type player
 
@@ -21,8 +18,6 @@ type player
 type action_card = {
     player: player;
     title: string;
-    adjudication_procedures: todo;
-    play_constraint: todo;
     play_cost: int;
     card_number: int;
 }
@@ -40,9 +35,13 @@ type international_event_card_deck = international_event_card list
 type starting_condition
 type victory_condition
 
-type scenario = {
-    player_decks: (player * (action_card_deck * international_event_card_deck * domestic_event_card_deck)) list;
-    international_events: international_event_card_deck;
-    starting_condition: starting_condition;
-    victory_condition: victory_condition;
-}
+module type Scenario = sig
+    type t
+
+    val player_decks : t -> (player * (action_card_deck * investment_card_deck * domestic_event_card_deck)) list;
+    val international_events : t -> international_event_card_deck;
+    val starting_condition : t -> starting_condition;
+    val victory_condition : t -> victory_condition;
+end
+
+module MakeScenario() : Scenario
