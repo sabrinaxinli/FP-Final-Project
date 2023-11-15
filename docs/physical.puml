@@ -1,0 +1,27 @@
+@startuml physical view
+
+node "Game Server" {
+    [Game Management System]
+    [Scenario Database]
+}
+
+node "Player Device" {
+    [Player Client Application]
+}
+
+node "Facilitator Device" {
+    [Facilitator Client Application]
+}
+
+database "Game Data Storage" {
+    folder "Scenarios"
+    folder "Player Data"
+    folder "Game State"
+}
+
+[Game Management System] --> [Scenario Database]
+[Player Client Application] --> [Game Management System]
+[Facilitator Client Application] --> [Game Management System]
+[Game Management System] --> [Game Data Storage]
+
+@enduml

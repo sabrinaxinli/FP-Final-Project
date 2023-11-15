@@ -1,0 +1,55 @@
+@startuml development view
+
+package "Hedgemony Game Application" {
+
+    [Game Management] ..> [Scenario]: <<use>>
+    [Game Management] ..> [Player]: <<use>>
+    [Game Management] ..> [Facilitator]: <<use>>
+    [Game Management] ..> [Game Data Storage]: <<use>>
+
+    package "Game Core" {
+        [Game Management] 
+        [Game Logic]
+        [Game State]
+
+        [Game Management] -right-> [Game Logic]
+        [Game Logic] -down-> [Game State]
+    }
+
+    package "Scenarios" {
+        [Scenario] 
+        [Scenario Factory] <<functor>>
+        
+        [Scenario Factory] -up-> [Scenario]
+    }
+
+    package "Players" {
+        [Player]
+        [Player Actions]
+        
+        [Player] -right-> [Player Actions]
+    }
+
+    package "Facilitators" {
+        [Facilitator]
+        [Event Management]
+        
+        [Facilitator] -down-> [Event Management]
+    }
+
+    package "Data Management" {
+        [Game Data Storage]
+        [Data Access]
+        
+        [Game Data Storage] -left-> [Data Access]
+    }
+}
+
+[Game Management] ..> [Game Logic]: <<use>>
+[Game Management] ..> [Game State]: <<use>>
+[Scenario] ..> [Game State]: <<use>>
+[Player Actions] ..> [Game State]: <<use>>
+[Event Management] ..> [Game State]: <<use>>
+[Data Access] ..> [Game State]: <<use>>
+
+@enduml
