@@ -1,0 +1,26 @@
+@startuml scenario
+
+!define PlayerActor(actor)
+!define FacilitatorActor(actor)
+
+PlayerActor(Player)
+FacilitatorActor(Facilitator)
+
+left to right direction
+
+usecase "Connect to Game" as CG
+usecase "Perform Actions" as PA
+usecase "View Game State" as VG
+usecase "Manage Game Flow" as MG
+usecase "Oversee Scenario" as OS
+usecase "Inject Events" as IE
+
+Player --> CG
+Player --> PA
+Player --> VG
+Facilitator --> CG
+Facilitator --> MG
+Facilitator --> OS
+Facilitator --> IE
+
+@enduml
