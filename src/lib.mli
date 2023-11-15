@@ -26,6 +26,7 @@ type action_card = {
     play_cost: int;
     card_number: int;
 }
+
 type action_card_deck = action_card list
 
 type investment_card
