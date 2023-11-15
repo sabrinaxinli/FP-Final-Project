@@ -29,6 +29,10 @@ deactivate GMS
 
 Player -> GMS : Choose Action
 activate GMS
+GMS -> Facilitator : Facilitate Action
+activate Facilitator
+Facilitator --> GMS : Facilitate Action
+deactivate Facilitator
 GMS -> GMS : Process Game Logic
 GMS -> GDS : Update Game State
 GMS --> Player : Display Game State
