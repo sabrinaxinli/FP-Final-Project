@@ -1,0 +1,46 @@
+@startuml process view
+
+actor Player
+actor Facilitator
+entity "Game Management System" as GMS
+database "Game Data Storage" as GDS
+
+== Game Initialization ==
+
+Facilitator -> GMS : Connect to Game
+activate GMS
+GMS -> GDS : Retrieve Facilitator Profile
+activate GDS
+GDS --> GMS : Return Facilitator Profile
+deactivate GDS
+GMS --> Facilitator : Confirm Connection & Display Control Panel
+deactivate GMS
+
+Player -> GMS : Connect to Game
+activate GMS
+GMS -> GDS : Retrieve Player Profile
+activate GDS
+GDS --> GMS : Return Player Profile
+deactivate GDS
+GMS --> Player : Confirm Connection & Display Initial State
+deactivate GMS
+
+== Game Turn Sequence ==
+
+Player -> GMS : Choose Action
+activate GMS
+GMS -> GMS : Process Game Logic
+GMS -> GDS : Update Game State
+GMS --> Player : Display Game State
+deactivate GMS
+
+== Facilitator Interaction ==
+
+Facilitator -> GMS : Inject Event / Update Scenario
+activate GMS
+GMS -> GMS : Process Facilitator Input
+GMS -> GDS : Update Scenario Data
+GMS --> Player : Update Game State with Event
+deactivate GMS
+
+@enduml
