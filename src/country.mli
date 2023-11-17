@@ -1,3 +1,19 @@
+(******************************************************************************
+
+  File: country.mli
+
+  Project: Command & Converse
+
+  Author: Adam Byerly & Sabrina Li
+
+  Description:                                                              
+  This file contains defines types and moduels for representing and managing
+  countries within the game 'Hedgemony.' It includes types for basic country
+  parameters, critical military and strategic capabilities, and area of
+  responsibility modifiers.                                     
+                                                                             
+******************************************************************************)
+
 type parameters = {
   force_size : int;
   national_tech_level: int;
@@ -64,5 +80,9 @@ module type Country = sig
   
 end
 
+<<<<<<< HEAD
 module MakeCountry (State : sig val initial_data: country_data end) : Country
 
+=======
+module MakeCountry (_ : CountryState) : Country
+>>>>>>> d2f2935faec82fa0a1d02bef83a00eaa9679ef48

@@ -5,15 +5,15 @@
  (libraries core))
 
 (library
- (name game)
- (modules game)
- (modules_without_implementation game)
- (libraries core))
-
-(library
  (name scenario)
  (modules scenario)
  (modules_without_implementation scenario)
+ (libraries core country))
+
+(library
+ (name game)
+ (modules game)
+ (modules_without_implementation game)
  (libraries core))
 
 (executable
