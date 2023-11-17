@@ -1,6 +1,6 @@
 (*****************************************************************************)
 (*                                                                           *)
-(* File: lib.mli                                                             *)
+(* File: scenario.mli                                                        *)
 (*                                                                           *)
 (* Project: Command & Converse                                               *)
 (*                                                                           *)
@@ -60,13 +60,4 @@ module type Scenario = sig
     val victory_condition : t -> victory_condition;
 end
 
-module MakeScenario() : Scenario
-
-
-
-
-
-
-
-
-
+module MakeDefaultScenario() : Scenario
