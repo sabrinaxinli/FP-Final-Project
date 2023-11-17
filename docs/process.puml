@@ -1,7 +1,8 @@
 @startuml process view
 
-actor Player
 actor Facilitator
+actor BluePlayer
+actor RedPlayer
 entity "Game Management System" as GMS
 database "Game Data Storage" as GDS
 
@@ -16,31 +17,82 @@ deactivate GDS
 GMS --> Facilitator : Confirm Connection & Display Control Panel
 deactivate GMS
 
-Player -> GMS : Connect to Game
+BluePlayer -> GMS : Connect to Game
 activate GMS
 GMS -> GDS : Retrieve Player Profile
 activate GDS
 GDS --> GMS : Return Player Profile
 deactivate GDS
-GMS --> Player : Confirm Connection & Display Initial State
+GMS --> BluePlayer : Confirm Connection & Display Initial State
 deactivate GMS
 
-== Game Turn Sequence ==
-
-Player -> GMS : Choose Action
+RedPlayer -> GMS : Connect to Game
 activate GMS
+GMS -> GDS : Retrieve Player Profile
+activate GDS
+GDS --> GMS : Return Player Profile
+deactivate GDS
+GMS --> RedPlayer : Confirm Connection & Display Initial State
+deactivate GMS
+
+== Red Signaling Phase ==
+
+loop Until Actions Accepted
+    RedPlayer -> GMS : Propose Future Actions
+    GMS -> Facilitator : Proposed Actions
+    group Facilitate Actions Allowable
+        Facilitator --> GMS : Allow Action
+        GMS -> RedPlayer : Actions Accepted
+    else Actions Disallowed
+        Facilitator --> GMS : Disallow Action
+        GMS -> RedPlayer : Actions Rejected
+    end
+end
+
+GMS -> BluePlayer : Display Game State
+
+== Blue Action Phase ==
+
+loop Until Actions Accepted
+    BluePlayer -> GMS : Propose Actions
+    GMS -> Facilitator : Proposed Actions
+    group Facilitate Actions Allowable
+        Facilitator --> GMS : Allow Action
+        GMS -> BluePlayer : Actions Accepted
+    else Actions Disallowed
+        Facilitator --> GMS : Disallow Action
+        GMS -> BluePlayer : Actions Rejected
+    end
+end
+
 GMS -> GMS : Process Game Logic
 GMS -> GDS : Update Game State
-GMS --> Player : Display Game State
-deactivate GMS
+GMS --> BluePlayer : Display Game State
+GMS --> RedPlayer : Display Game State
 
-== Facilitator Interaction ==
+== Red Action Phase ==
 
-Facilitator -> GMS : Inject Event / Update Scenario
+RedPlayer -> GMS : Play One, or Multiple, Proposed Actions
+GMS -> GMS : Process Game Logic
+GMS -> GDS : Update Game State
+GMS --> BluePlayer : Display Game State
+GMS --> RedPlayer : Display Game State
+
+== Resource Allocation Phase ==
+
+GMS -> GMS : Distribute Resources in Game State
+GMS -> GDS : Update Game State
+GMS --> BluePlayer : Display Game State
+GMS --> RedPlayer : Display Game State
+
+== Event Injection (Asynchronous) ==
+
+Facilitator -> GMS : Inject Event
 activate GMS
 GMS -> GMS : Process Facilitator Input
 GMS -> GDS : Update Scenario Data
-GMS --> Player : Update Game State with Event
+GMS --> BluePlayer : Update Game State with Event
+GMS --> RedPlayer : Update Game State with Event
 deactivate GMS
 
 @enduml
