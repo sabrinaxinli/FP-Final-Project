@@ -14,33 +14,24 @@ type critical_capabilities = {
   nuclear_forces: int;
 }
 
-type aor = CONUS | INDOPACOM_PRC | INDOPACOM_DPRK | CENTCOM_IRAN | CENTCOM_AFGHANISTAN | CENTCOM_IRAQ | EUCOM_RU
-type country_name = US | NATO_EU | PRC | RU | DPRK | IR
-type affliation = RED | BLUE | WHITE
-
-(* Fix this deriving situation later *)
-module type AOR_Key = sig
-  type t = aor
-  [@@deriving compare]
-end
-
-module AOR_Map = Map.Make(AOR_Key)
+module AOR_Map = Map.Make(String)
 
 type combat_resources = {
   critical_capabilities: critical_capabilities;
   forces: (int * int) AOR_Map.t
 }
 
+type aor = CONUS | INDOPACOM_PRC | INDOPACOM_DPRK | CENTCOM_IRAN | CENTCOM_AFGHANISTAN | CENTCOM_IRAQ | EUCOM_RU
+
 type country_data = {
-  country_name : country_name;
-  affliation: affliation;
   parameters: parameters;
   combat_resources: combat_resources;
 }
 
+type country_name = US | NATO_EU | PRC | RU | DPRK | IR
 
 module type Country = sig
-  type t (* should we break up t from one country_data object to multiple? *)
+  type t
   val create: country_name -> country_data -> t
   val get_player_name : t -> country_name
   val get_force_size : t -> int
@@ -55,14 +46,12 @@ module type Country = sig
   val nuclear_forces: t -> int
   val get_aor: t -> (int * modifier) list
   val get_ip: t -> int
-  (* Combat and force maintenance procedures *)
-  val procure_forces: t -> t
-  val modernize_forces: t -> t
-  val deploy_forces: t -> t
-  val apply_combat_results: t -> t
-  val update_resources: t -> t
-  
 end
 
-module MakeCountry (State : sig val initial_data: country_data end) : Country
+module MakeCountry (State : sig val initial_data: country_data end) : Country = struct
+  (* Add code here *)
+end
+
+module US = MakeCountry(struct let initial_data = us_data end)
+let us = USCountry.create US us_data
 
