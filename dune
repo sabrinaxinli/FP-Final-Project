@@ -1,8 +1,9 @@
 (rule
   (target command_converse.zip)
   (deps 
-    src/lib.ml
-    src/lib.mli
+    src/country.mli
+    src/scenario.mli
+    src/game.mli
     src/server.ml
     src/client.ml
     src/dune

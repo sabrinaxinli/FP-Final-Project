@@ -1,19 +1,27 @@
 (library
-  (name lib)
-  (modules lib)
-  (libraries 
-    core))
+ (name country)
+ (modules country)
+ (modules_without_implementation country)
+ (libraries core))
+
+(library
+ (name game)
+ (modules game)
+ (modules_without_implementation game)
+ (libraries core))
+
+(library
+ (name scenario)
+ (modules scenario)
+ (modules_without_implementation scenario)
+ (libraries core))
 
 (executable
-  (name server)
-  (modules server)
-  (libraries
-    lib
-    core))
+ (name server)
+ (modules server)
+ (libraries core))
 
 (executable
-  (name client)
-  (modules client)
-  (libraries
-    lib
-    core))
+ (name client)
+ (modules client)
+ (libraries core))
