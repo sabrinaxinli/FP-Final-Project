@@ -80,9 +80,5 @@ module type Country = sig
   
 end
 
-<<<<<<< HEAD
 module MakeCountry (State : sig val initial_data: country_data end) : Country
 
-=======
-module MakeCountry (_ : CountryState) : Country
->>>>>>> d2f2935faec82fa0a1d02bef83a00eaa9679ef48
