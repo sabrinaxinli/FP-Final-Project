@@ -1,7 +1,6 @@
 (library
  (name country)
  (modules country)
- (modules_without_implementation country)
  (libraries core))
 
 (library
@@ -11,9 +10,9 @@
  (libraries core country))
 
 (library
- (name game)
- (modules game)
- (modules_without_implementation game)
+ (name gamestate)
+ (modules gamestate)
+ (modules_without_implementation gamestate)
  (libraries core))
 
 (executable
