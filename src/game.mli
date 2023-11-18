@@ -5,6 +5,7 @@
 end
 
 module Create_victory_condition : VictoryCondition *)
+module Player_Map = Map.Make(String)
 
 open Country
 
@@ -30,7 +31,7 @@ module type Card = sig
 	val get_aor: t -> Country.aor option
 	val get_public: t -> bool option
 	val get_play_cost: t -> int option
-	val execute_card: t -> Country.Country -> Country.Country -> (Country.Country * Country.Country)
+	val execute_card: t -> Country.Country Player_Map.t -> Country.Country Player_Map.t
 end
 
 module type Deck = sig
@@ -42,8 +43,6 @@ module type Deck = sig
 end
 
 module MakeDeck(LoadData: sig val get_filepath: string end) : Deck
-
-module Player_Map = Map.Make(String)
 
 type Game_data = {
     countries: Country.Country Player_Map.t

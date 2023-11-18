@@ -21,6 +21,7 @@ module type GameStateManager = sig
     val get_private_display: gamestate -> string -> string (* game_data -> country_name -> text summary of game_data *)
     val play_round: gamestate -> gamestate
     val check_victory: gamestate -> string list (* returns string list of winners *)
+    val facilitate_gamestate: gamestate -> gamestate
 end
 
 module MakeGameStateManager (GameState: sig val get_init_filepaths: string list end) : GameStateManager
