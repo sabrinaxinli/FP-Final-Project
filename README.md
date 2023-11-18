@@ -14,3 +14,5 @@ Libraries:
 - ppx_deriving_yojson - Configuration Parsing
 - OUnit2 - Testing
 - dune / opam - Build and Packaging
+
+[Hedgemony Game](https://www.rand.org/pubs/tools/TL301.html)
