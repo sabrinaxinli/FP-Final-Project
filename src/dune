@@ -4,23 +4,23 @@
  (libraries core))
 
 (library
- (name scenario)
- (modules scenario)
- (modules_without_implementation scenario)
+ (name game)
+ (modules game)
+ (modules_without_implementation game)
  (libraries core country))
 
 (library
  (name gamestate)
  (modules gamestate)
  (modules_without_implementation gamestate)
- (libraries core))
+ (libraries core game))
 
 (executable
  (name server)
  (modules server)
- (libraries core))
+ (libraries core async lwt lwt.unix))
 
 (executable
  (name client)
  (modules client)
- (libraries core))
+ (libraries core async lwt lwt.unix))

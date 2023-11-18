@@ -2,8 +2,8 @@
   (target command_converse.zip)
   (deps 
     src/country.mli
-    src/scenario.mli
     src/game.mli
+    src/gamestate.mli
     src/server.ml
     src/client.ml
     src/dune
