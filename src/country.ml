@@ -26,6 +26,7 @@ type aor = CONUS | INDOPACOM_PRC | INDOPACOM_DPRK | CENTCOM_IRAN | CENTCOM_AFGHA
 type country_data = {
   parameters: parameters;
   combat_resources: combat_resources;
+  npc: bool;
 }
 
 type country_name = US | NATO_EU | PRC | RU | DPRK | IR
@@ -46,6 +47,8 @@ module type Country = sig
   val nuclear_forces: t -> int
   val get_aor: t -> (int * modifier) list
   val get_ip: t -> int
+  val get_npc: t -> bool
+  val get_action: 
 end
 
 module MakeCountry (State : sig val initial_data: country_data end) : Country = struct

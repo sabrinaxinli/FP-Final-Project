@@ -39,6 +39,7 @@ type domestic_event_card = {
 type domestic_event_card_deck = domestic_event_card list
 
 type aor = NORTH | SOUTH | EU | AFRI | CENT | INDOPAC
+
 type international_event_card = {
     title: string;
     description: string;
@@ -51,9 +52,9 @@ type international_event_card_deck = international_event_card list
 type starting_condition
 type victory_condition
 
+
 module type Scenario = sig
     type t
-
     val player_decks : t -> (action_card_deck * investment_card_deck * domestic_event_card_deck) list;
     val international_events : t -> international_event_card_deck;
     val starting_condition : t -> starting_condition;
