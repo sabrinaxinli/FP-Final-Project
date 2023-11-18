@@ -1,10 +1,10 @@
-module type VictoryCondition : sig
+(* module type VictoryCondition : sig
     type Player
     type IP
     val check_for_victory : (Player * IP) List -> (Player * Bool) List
 end
 
-module Create_victory_condition : VictoryCondition
+module Create_victory_condition : VictoryCondition *)
 
 module type GameStateManager = sig
     include Game.GameTurn;
@@ -16,6 +16,7 @@ module type GameStateManager = sig
     val get_public_display: gamestate -> string (* game_data -> text summary of public information *)
     val get_private_display: gamestate -> string -> string (* game_data -> country_name -> text summary of game_data *)
     val play_round: gamestate -> gamestate
+    val facilitate_gamestate: gamestate -> gamestate
 end
 
 module MakeGameStateManager (GameState: sig val get_init_filepaths: string list end) : GameStateManager
