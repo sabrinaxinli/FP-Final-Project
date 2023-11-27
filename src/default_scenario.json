@@ -1,0 +1,98 @@
+{
+    "US": {
+        "parameters": {
+            "force_size": 20,
+            "national_tech_level": 4,
+            "resources": 40,
+            "per_turn_resources": 30,
+            "influence_points": 50
+        },
+        "critical_capabilities": {
+            "lrf": 0,
+            "c4isr": 3,
+            "iamd_bmd": 3,
+            "sof": 3,
+            "nuclear_forces": 0
+        }
+    },
+    "NATO_EU": {
+        "parameters": {
+            "force_size": 5,
+            "national_tech_level": 4,
+            "resources": 10,
+            "per_turn_resources": 5,
+            "influence_points": 50
+        },
+        "critical_capabilities": {
+            "lrf": 0,
+            "c4isr": 3,
+            "iamd_bmd": 3,
+            "sof": 0,
+            "nuclear_forces": 0
+        }
+    },
+    "RU": {
+        "parameters": {
+            "force_size": 9,
+            "national_tech_level": 4,
+            "resources": 15,
+            "per_turn_resources": 5,
+            "influence_points": 30
+        },
+        "critical_capabilities": {
+            "lrf": 4,
+            "c4isr": 3,
+            "iamd_bmd": 0,
+            "sof": 0,
+            "nuclear_forces": 0
+        }
+    },
+    "PRC": {
+        "parameters": {
+            "force_size": 15,
+            "national_tech_level": 4,
+            "resources": 15,
+            "per_turn_resources": 4,
+            "influence_points": 40
+        },
+        "critical_capabilities": {
+            "lrf": 4,
+            "c4isr": 3,
+            "iamd_bmd": 0,
+            "sof": 0,
+            "nuclear_forces": 0
+        }
+    },
+    "DPRK": {
+        "parameters": {
+            "force_size": 10,
+            "national_tech_level": 1,
+            "resources": 5,
+            "per_turn_resources": 3,
+            "influence_points": 5
+        },
+        "critical_capabilities": {
+            "lrf": 1,
+            "c4isr": 0,
+            "iamd_bmd": 0,
+            "sof": 0,
+            "nuclear_forces": 0
+        }
+    },
+    "IR": {
+        "parameters": {
+            "force_size": 5,
+            "national_tech_level": 2,
+            "resources": 8,
+            "per_turn_resources": 4,
+            "influence_points": 5
+        },
+        "critical_capabilities": {
+            "lrf": 2,
+            "c4isr": 1,
+            "iamd_bmd": 0,
+            "sof": 0,
+            "nuclear_forces": 0
+        }
+    }
+}
