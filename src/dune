@@ -1,7 +1,8 @@
 (library
  (name country)
  (modules country)
- (libraries core))
+ (libraries core)
+ (preprocess (pps ppx_jane)))
 
 (library
  (name game)

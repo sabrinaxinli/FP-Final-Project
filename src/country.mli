@@ -14,6 +14,8 @@
                                                                              
 ******************************************************************************)
 
+open Core;;
+
 type parameters = {
   force_size : int;
   national_tech_level: int;
@@ -35,12 +37,31 @@ type country_name = US | NATO_EU | PRC | RU | DPRK | IR
 type affliation = RED | BLUE | WHITE
 
 (* Fix this deriving situation later *)
-module type AOR_Key = sig
+(* module type AOR_Key = sig
   type t = aor
   [@@deriving compare]
 end
 
-module AOR_Map = Map.Make(AOR_Key)
+module AOR_Map = Map.Make(AOR_Key) *)
+
+module type AOR_Key = sig
+  type t =
+    | CONUS 
+    | INDOPACOM_PRC
+    | INDOPACOM_DPRK
+    | CENTCOM_IRAN
+    | CENTCOM_AFGHANISTAN
+    | CENTCOM_IRAQ
+    | EUCOM_RU
+  val sexp_of_t : t -> Sexplib0.Sexp.t
+  val t_of_sexp : Sexplib0.Sexp.t -> t
+  val compare : t -> t -> int
+  
+end
+
+module AOR_Map = Core.Map.Make(AOR_Key)
+
+  
 
 type combat_resources = {
   critical_capabilities: critical_capabilities;
