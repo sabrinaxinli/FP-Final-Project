@@ -2,7 +2,7 @@
  (name country)
  (modules country)
  (libraries core)
- (preprocess (pps ppx_jane)))
+ (preprocess (pps ppx_jane ppx_deriving_yojson)))
 
 (library
  (name game)

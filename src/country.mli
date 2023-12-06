@@ -13,8 +13,7 @@
   responsibility modifiers.                                     
                                                                              
 ******************************************************************************)
-
-open Core;;
+(* open Core *)
 
 type parameters = {
   force_size : int;
@@ -32,9 +31,9 @@ type critical_capabilities = {
   nuclear_forces: int;
 }
 
-type aor = CONUS | INDOPACOM_PRC | INDOPACOM_DPRK | CENTCOM_IRAN | CENTCOM_AFGHANISTAN | CENTCOM_IRAQ | EUCOM_RU
-type country_name = US | NATO_EU | PRC | RU | DPRK | IR
-type affliation = RED | BLUE | WHITE
+(* type aor = CONUS | INDOPACOM_PRC | INDOPACOM_DPRK | CENTCOM_IRAN | CENTCOM_AFGHANISTAN | CENTCOM_IRAQ | EUCOM_RU *)
+(* type country_name = US | NATO_EU | PRC | RU | DPRK | IR *)
+(* type affiliation = RED | BLUE | WHITE *)
 
 (* Fix this deriving situation later *)
 (* module type AOR_Key = sig
@@ -44,8 +43,8 @@ end
 
 module AOR_Map = Map.Make(AOR_Key) *)
 
-module type AOR_Key = sig
-  type t =
+(* module type AOR_Key = sig
+    type t = 
     | CONUS 
     | INDOPACOM_PRC
     | INDOPACOM_DPRK
@@ -53,45 +52,47 @@ module type AOR_Key = sig
     | CENTCOM_AFGHANISTAN
     | CENTCOM_IRAQ
     | EUCOM_RU
-  val sexp_of_t : t -> Sexplib0.Sexp.t
-  val t_of_sexp : Sexplib0.Sexp.t -> t
+  val sexp_of_t : t -> Sexp.t
+  val t_of_sexp : Sexp.t -> t
   val compare : t -> t -> int
   
-end
+end *)
 
-module AOR_Map = Core.Map.Make(AOR_Key)
+type aor_map
 
-  
 
 type combat_resources = {
   critical_capabilities: critical_capabilities;
-  forces: (int * int) AOR_Map.t
+  forces: aor_map
 }
 
 type country_data = {
-  country_name : country_name;
-  affliation: affliation;
+  name: string;
   parameters: parameters;
   combat_resources: combat_resources;
+  npc: bool;
+  affiliation: string;
 }
 
 
 module type Country = sig
-  type t (* should we break up t from one country_data object to multiple? *)
-  val create: country_name -> country_data -> t
-  val get_player_name : t -> country_name
-  val get_force_size : t -> int
+  type t = country_data
+  val create: unit -> t
+  val get_player_name : t -> string
+  val get_force_size : t -> string -> int
   val get_national_tech_level: t -> int
   val get_resources: t -> int
   val get_per_turn_resources: t -> int
   val get_influence_points: t -> int
-  val lrf: t -> int
-  val c4isr: t -> int
-  val iamd_bmd: t -> int
-  val sof: t -> int
-  val nuclear_forces: t -> int
-  val get_aor: t -> (int * modifier) list
+  val get_lrf: t -> int
+  val get_c4isr: t -> int
+  val get_iamd_bmd: t -> int
+  val get_sof: t -> int
+  val get_nuclear_forces: t -> int
+  val get_aor: t -> string -> int
   val get_ip: t -> int
+  val get_npc: t -> bool
+  val get_action: t -> string
   (* Combat and force maintenance procedures *)
   val procure_forces: t -> t
   val modernize_forces: t -> t
@@ -101,5 +102,5 @@ module type Country = sig
   
 end
 
-module MakeCountry (State : sig val initial_data: country_data end) : Country
+module MakeCountry (_ : sig val initial_data: string end) : Country
 

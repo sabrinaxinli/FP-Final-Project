@@ -5,9 +5,10 @@
 end
 
 module Create_victory_condition : VictoryCondition *)
-module Player_Map = Map.Make(String)
 
 open Country
+
+module Player_Map = Map.Make(String)
 
 type card_type = ACTION | INVESTMENT | DOMESTIC_EVENT | INTERNATIONAL_EVENT
 
@@ -16,10 +17,10 @@ type card = {
 	title: string;
 	description: string;
 	card_number: int;
-	aor: Country.aor option;
+	aor: string option;
 	public: bool option;
 	play_cost: int option;
-}
+} [@@deriving yojson]
 
 module type Card = sig
 	type t
@@ -28,7 +29,7 @@ module type Card = sig
 	val get_title: t -> string
 	val get_description: t -> string
 	val get_card_number: t -> int
-	val get_aor: t -> Country.aor option
+	val get_aor: t -> string option
 	val get_public: t -> bool option
 	val get_play_cost: t -> int option
 	val execute_card: t -> Country.Country Player_Map.t -> Country.Country Player_Map.t
