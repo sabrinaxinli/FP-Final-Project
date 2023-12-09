@@ -1,5 +1,16 @@
 (test
  (name server_tests)
+ (modules server_tests)
  (libraries ounit2 core core_unix lwt lwt.unix server)
  (preprocess
   (pps ppx_jane)))
+
+(test
+ (name tests)
+ (modules tests)
+ (libraries
+   core
+   ounit2
+   country
+   game)
+ (preprocess (pps ppx_jane ppx_sexp_conv)))

@@ -1,8 +1,8 @@
-; (library
-;  (name country)
-;  (modules country)
-;  (libraries core)
-;  (preprocess (pps ppx_jane ppx_deriving_yojson)))
+(library
+ (name country)
+ (modules country)
+ (libraries core)
+ (preprocess (pps ppx_jane ppx_deriving_yojson)))
 
 ; (library
 ;  (name game)
@@ -15,6 +15,19 @@
 ;  (modules gamestate)
 ;  (modules_without_implementation gamestate)
 ;  (libraries core game))
+
+(library
+ (name game)
+ (modules game)
+ (modules_without_implementation game)
+ (libraries core country)
+ (preprocess (pps ppx_jane ppx_deriving_yojson)))
+
+(library
+ (name gamestate)
+ (modules gamestate)
+ (modules_without_implementation gamestate)
+ (libraries core game))
 
 (library
  (name server)

@@ -1,6 +1,7 @@
 open Core
 (* open Yojson *)
 
+
 type parameters = {
   force_size : int;
   national_tech_level: int;
@@ -17,16 +18,15 @@ type critical_capabilities = {
   nuclear_forces: int;
 } [@@deriving yojson]
 
-module AOR_Key = struct
+module AreaKey = struct
   type t = 
-    | CONUS 
-    | INDOPACOM_PRC
-    | INDOPACOM_DPRK
-    | CENTCOM_IRAN
-    | CENTCOM_AFGHANISTAN
-    | CENTCOM_IRAQ
-    | EUCOM_RU
-
+  | CONUS 
+  | INDOPACOM_PRC
+  | INDOPACOM_DPRK
+  | CENTCOM_IRAN
+  | CENTCOM_AFGHANISTAN
+  | CENTCOM_IRAQ
+  | EUCOM_RU
   [@@deriving sexp, compare]
 
   let of_string (str: string) : t =
@@ -34,19 +34,21 @@ module AOR_Key = struct
   
   let to_string (key: t) : string =
     (sexp_of_t key) |> Sexp.to_string
+
 end
 
-module AOR_Map = Map.Make(AOR_Key)
-type aor_map = int AOR_Map.t
+
+module AORMap = Core.Map.Make(AreaKey)
+type aor_map = int AORMap.t
 
 let aor_map_to_yojson (m: aor_map) : Yojson.Safe.t =
-  `Assoc (Core.Map.to_alist m |> List.map ~f:(fun (k, v) -> (AOR_Key.to_string k), `Int v))
+  `Assoc (Core.Map.to_alist m |> List.map ~f:(fun (k, v) -> (AreaKey.to_string k), `Int v))
 
 let aor_map_of_yojson (json: Yojson.Safe.t) : (aor_map, string) result = 
   match json with 
-    | `Assoc ls -> Ok (List.fold ls ~init: AOR_Map.empty ~f:(fun acc (k, v) -> 
+    | `Assoc ls -> Ok (List.fold ls ~init: AORMap.empty ~f:(fun acc (k, v) -> 
         match v with
-          | `Int i -> Map.add_exn acc ~key: (AOR_Key.of_string k) ~data:i
+          | `Int i -> Map.add_exn acc ~key: (AreaKey.of_string k) ~data:i
           | _ -> failwith "should be int"))
     | _ -> Error "should not be anything other than an assoc list"
 
@@ -105,7 +107,7 @@ module MakeCountry (State : sig val initial_data: string end) : Country = struct
     cd.name
     
   let get_force_size (cd: t) (region: string): int =
-    Map.find_exn cd.combat_resources.forces (AOR_Key.of_string region)
+    Map.find_exn cd.combat_resources.forces (AreaKey.of_string region)
   
   let get_national_tech_level (cd: t) : int =
     cd.parameters.national_tech_level
