@@ -4,8 +4,9 @@
     src/country.mli
     src/game.mli
     src/gamestate.mli
+    src/server.mli
     src/server.ml
-    src/client.ml
+    src/main.ml
     src/dune
     tests/tests.ml
     tests/dune

@@ -354,7 +354,6 @@ let test_country_of_to_yojson_2 _ =
     | Ok combat_resource ->
         let yojson = Country.country_data_to_yojson combat_resource in
         let result_str = Yojson.Safe.to_string yojson in
-        print_endline result_str;
         assert_equal result_str country_str_2_correct
     | Error _ -> failwith "should not be aor_map"
 

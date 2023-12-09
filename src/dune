@@ -4,10 +4,21 @@
  (libraries core)
  (preprocess (pps ppx_jane ppx_deriving_yojson)))
 
+; (library
+;  (name game)
+;  (modules game)
+;  (modules_without_implementation game)
+;  (libraries core country))
+
+; (library
+;  (name gamestate)
+;  (modules gamestate)
+;  (modules_without_implementation gamestate)
+;  (libraries core game))
+
 (library
  (name game)
  (modules game)
- ; (modules_without_implementation game)
  (libraries core country)
  (preprocess (pps ppx_jane ppx_deriving_yojson)))
 
@@ -17,12 +28,14 @@
  (modules_without_implementation gamestate)
  (libraries core game))
 
-(executable
+(library
  (name server)
  (modules server)
- (libraries core async lwt lwt.unix))
+ (libraries core core_unix core_unix.command_unix async lwt lwt.unix)
+ (preprocess
+  (pps ppx_jane bisect_ppx)))
 
 (executable
- (name client)
- (modules client)
- (libraries core async lwt lwt.unix))
+ (name main)
+ (modules main)
+ (libraries core server))
