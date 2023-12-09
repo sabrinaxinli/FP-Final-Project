@@ -1,21 +1,36 @@
-{
-    "US": {
-        "parameters": {
-            "force_size": 20,
-            "national_tech_level": 4,
-            "resources": 40,
-            "per_turn_resources": 30,
-            "influence_points": 50
-        },
+[
+    {
+      "name": "US",
+      "parameters": {
+          "force_size": 20,
+          "national_tech_level": 4,
+          "resources": 40,
+          "per_turn_resources": 30,
+          "influence_points": 50
+      },
+      "combat_resources": {
         "critical_capabilities": {
             "lrf": 0,
             "c4isr": 3,
             "iamd_bmd": 3,
             "sof": 3,
             "nuclear_forces": 0
+        },
+        "forces": {
+            "CONUS": 14,
+            "INDOPACOM_PRC": 1,
+            "INDOPACOM_DPRK": 2,
+            "CENTCOM_IRAN": 0,
+            "CENTCOM_AFGHANISTAN": 1,
+            "CENTCOM_IRAQ": 1,
+            "EUCOM_RU": 1
         }
+      },
+      "npc": false,
+      "affiliation": "BLUE"
     },
-    "NATO_EU": {
+    {
+        "name": "NATO/EU",
         "parameters": {
             "force_size": 5,
             "national_tech_level": 4,
@@ -23,47 +38,89 @@
             "per_turn_resources": 5,
             "influence_points": 50
         },
-        "critical_capabilities": {
-            "lrf": 0,
-            "c4isr": 3,
-            "iamd_bmd": 3,
-            "sof": 0,
-            "nuclear_forces": 0
-        }
+        "combat_resources": {
+          "critical_capabilities": {
+              "lrf": 0,
+              "c4isr": 3,
+              "iamd_bmd": 3,
+              "sof": 0,
+              "nuclear_forces": 0
+          },
+          "forces": {
+              "CONUS": 0,
+              "INDOPACOM_PRC": 0,
+              "INDOPACOM_DPRK": 0,
+              "CENTCOM_IRAN": 0,
+              "CENTCOM_AFGHANISTAN": 0,
+              "CENTCOM_IRAQ": 0,
+              "EUCOM_RU": 5
+          }
+        },
+        "npc": true,
+        "affiliation": "BLUE"
     },
-    "RU": {
+    {
+        "name": "RU",
         "parameters": {
             "force_size": 9,
-            "national_tech_level": 4,
-            "resources": 15,
-            "per_turn_resources": 5,
-            "influence_points": 30
-        },
-        "critical_capabilities": {
-            "lrf": 4,
-            "c4isr": 3,
-            "iamd_bmd": 0,
-            "sof": 0,
-            "nuclear_forces": 0
-        }
-    },
-    "PRC": {
-        "parameters": {
-            "force_size": 15,
             "national_tech_level": 4,
             "resources": 15,
             "per_turn_resources": 4,
             "influence_points": 40
         },
-        "critical_capabilities": {
-            "lrf": 4,
-            "c4isr": 3,
-            "iamd_bmd": 0,
-            "sof": 0,
-            "nuclear_forces": 0
-        }
+        "combat_resources": {
+          "critical_capabilities": {
+              "lrf": 4,
+              "c4isr": 3,
+              "iamd_bmd": 0,
+              "sof": 0,
+              "nuclear_forces": 0
+          },
+          "forces": {
+              "CONUS": 0,
+              "INDOPACOM_PRC": 0,
+              "INDOPACOM_DPRK": 0,
+              "CENTCOM_IRAN": 0,
+              "CENTCOM_AFGHANISTAN": 0,
+              "CENTCOM_IRAQ": 0,
+              "EUCOM_RU": 9
+          }
+        },
+        "npc": true,
+        "affiliation": "RED"
     },
-    "DPRK": {
+    {
+        "name": "PRC",
+        "parameters": {
+            "force_size": 15,
+            "national_tech_level": 4,
+            "resources": 15,
+            "per_turn_resources": 4,
+            "influence_points": 5
+        },
+        "combat_resources": {
+          "critical_capabilities": {
+              "lrf": 4,
+              "c4isr": 3,
+              "iamd_bmd": 0,
+              "sof": 0,
+              "nuclear_forces": 0
+          },
+          "forces": {
+              "CONUS": 0,
+              "INDOPACOM_PRC": 15,
+              "INDOPACOM_DPRK": 0,
+              "CENTCOM_IRAN": 0,
+              "CENTCOM_AFGHANISTAN": 0,
+              "CENTCOM_IRAQ": 0,
+              "EUCOM_RU": 0
+          }
+        },
+        "npc": true,
+        "affiliation": "RED"
+    },
+    {
+        "name": "DPRK",
         "parameters": {
             "force_size": 10,
             "national_tech_level": 1,
@@ -71,15 +128,29 @@
             "per_turn_resources": 3,
             "influence_points": 5
         },
-        "critical_capabilities": {
-            "lrf": 1,
-            "c4isr": 0,
-            "iamd_bmd": 0,
-            "sof": 0,
-            "nuclear_forces": 0
-        }
+        "combat_resources": {
+          "critical_capabilities": {
+              "lrf": 1,
+              "c4isr": 0,
+              "iamd_bmd": 0,
+              "sof": 0,
+              "nuclear_forces": 0
+          },
+          "forces": {
+              "CONUS": 0,
+              "INDOPACOM_PRC": 0,
+              "INDOPACOM_DPRK": 10,
+              "CENTCOM_IRAN": 0,
+              "CENTCOM_AFGHANISTAN": 0,
+              "CENTCOM_IRAQ": 0,
+              "EUCOM_RU": 0
+          }
+        },
+        "npc": true,
+        "affiliation": "RED"
     },
-    "IR": {
+    {
+        "name": "IR",
         "parameters": {
             "force_size": 5,
             "national_tech_level": 2,
@@ -87,12 +158,25 @@
             "per_turn_resources": 4,
             "influence_points": 5
         },
-        "critical_capabilities": {
-            "lrf": 2,
-            "c4isr": 1,
-            "iamd_bmd": 0,
-            "sof": 0,
-            "nuclear_forces": 0
-        }
+        "combat_resources": {
+          "critical_capabilities": {
+              "lrf": 2,
+              "c4isr": 0,
+              "iamd_bmd": 0,
+              "sof": 1,
+              "nuclear_forces": 0
+          },
+          "forces": {
+              "CONUS": 0,
+              "INDOPACOM_PRC": 0,
+              "INDOPACOM_DPRK": 0,
+              "CENTCOM_IRAN": 5,
+              "CENTCOM_AFGHANISTAN": 0,
+              "CENTCOM_IRAQ": 0,
+              "EUCOM_RU": 0
+          }
+        },
+        "npc": true,
+        "affiliation": "RED"
     }
-}
+]
