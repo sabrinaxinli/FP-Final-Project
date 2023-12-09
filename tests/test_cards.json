@@ -1,0 +1,21 @@
+[
+    {
+        "card_type" : "ACTION",
+        "title" : "Card Title",
+        "description" : "description of card",
+        "card_number" : 1,
+        "aor": "AOR Area",
+        "public": false,
+        "play_cost": 3
+    },
+
+    {
+        "card_type" : "ACTION",
+        "title" : "Card Title",
+        "description" : "description of card",
+        "card_number" : 1,
+        "aor": "AOR Area",
+        "public": false,
+        "play_cost": 3
+    }
+]

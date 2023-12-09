@@ -29,6 +29,9 @@ type card = {
     play_cost: int option;
 }
 
+val card_to_yojson : card -> Yojson.Safe.t
+val card_of_yojson : Yojson.Safe.t -> (card, string) result
+
 module type Card = sig
     type t
 

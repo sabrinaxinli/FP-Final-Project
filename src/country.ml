@@ -70,9 +70,10 @@ type country_data = {
 
 module type Country = sig
   type t = country_data
-  val create: unit -> t
+  val create: unit -> t list
   val get_player_name : t -> string
-  val get_force_size : t -> string -> int
+  val get_force_size : t -> int
+  val get_force_in_region: t -> string -> int
   val get_national_tech_level: t -> int
   val get_resources: t -> int
   val get_per_turn_resources: t -> int
@@ -98,15 +99,24 @@ end
 module MakeCountry (State : sig val initial_data: string end) : Country = struct
   type t = country_data
 
-  let create (): t =
-    match Yojson.Safe.from_file (State.initial_data) |> country_data_of_yojson with
-      | Ok data -> data
-      | Error _ -> failwith "Error received"
+  let deserialize_country_list (lst : Yojson.Safe.t list) : t list =
+    List.map ~f:(fun ele -> 
+                  match country_data_of_yojson ele with
+                    | Ok data -> data
+                    | Error _ -> failwith "Error with element") lst
+
+  let create () : t list =
+    match Yojson.Safe.from_file (State.initial_data) with
+      | `List lst -> deserialize_country_list lst
+      | _ -> failwith "Did not find json list"
 
   let get_player_name (cd : t) : string =
     cd.name
+
+  let get_force_size (cd : t) : int =
+    cd.parameters.force_size
     
-  let get_force_size (cd: t) (region: string): int =
+  let get_force_in_region (cd: t) (region: string): int =
     Map.find_exn cd.combat_resources.forces (AreaKey.of_string region)
   
   let get_national_tech_level (cd: t) : int =

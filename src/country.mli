@@ -78,9 +78,10 @@ val country_data_of_yojson: Yojson.Safe.t -> (country_data, string) result
 
 module type Country = sig
   type t = country_data
-  val create: unit -> t
+  val create: unit -> t list
   val get_player_name : t -> string
-  val get_force_size : t -> string -> int
+  val get_force_size : t -> int
+  val get_force_in_region: t -> string -> int
   val get_national_tech_level: t -> int
   val get_resources: t -> int
   val get_per_turn_resources: t -> int

@@ -182,23 +182,23 @@ let country_str_1_correct = {|{"name":"US","parameters":{"force_size":5,"nationa
 
 let country_str_2 = {|
   {
-    name: "US",
-    parameters: {
+    "name": "US",
+    "parameters": {
       "force_size": 3,
       "national_tech_level": 1,
       "resources": 5,
       "per_turn_resources": 9,
       "influence_points": 8
     },
-    combat_resources: {
-      critical_capabilities: {
+    "combat_resources": {
+      "critical_capabilities": {
         "lrf": 13,
         "c4isr": 2,
         "iamd_bmd": 10,
         "sof": 5,
         "nuclear_forces": 3
       },
-      forces: {
+      "forces": {
         "CONUS": 50,
         "INDOPACOM_PRC": 100,
         "INDOPACOM_DPRK": 250,
@@ -208,16 +208,43 @@ let country_str_2 = {|
         "EUCOM_RU": 70
       }
     },
-    npc: true,
-    affiliation: "red"
+    "npc": true,
+    "affiliation": "red"
   }
 |}
 
 let country_str_2_correct = {|{"name":"US","parameters":{"force_size":3,"national_tech_level":1,"resources":5,"per_turn_resources":9,"influence_points":8},"combat_resources":{"critical_capabilities":{"lrf":13,"c4isr":2,"iamd_bmd":10,"sof":5,"nuclear_forces":3},"forces":{"CONUS":50,"INDOPACOM_PRC":100,"INDOPACOM_DPRK":250,"CENTCOM_IRAN":80,"CENTCOM_AFGHANISTAN":200,"CENTCOM_IRAQ":60,"EUCOM_RU":70}},"npc":true,"affiliation":"red"}|}
 
-let run_serialize _ =
-  Yojson.Safe.to_file "critical_capabilities.json" (Country.critical_capabilities_to_yojson test_cc_1)
+module CountryData = struct
+  let initial_data = "../../../tests/test_country.json"
+end
 
+module TestCountry = Country.MakeCountry(CountryData)
+
+let card_str_1 = {|
+  {
+    "card_type" : "ACTION",
+    "title" : "Card Title",
+    "description" : "description of card",
+    "card_number" : 1,
+    "aor": "AOR Area",
+    "public": false,
+    "play_cost": 3
+  }
+|}
+
+let card_str_1_correct = {|{"card_type":"ACTION","title":"Card Title","description":"description of card","card_number":1,"aor":"AOR Area","public":false,"play_cost":3}|}
+(* let run_serialize _ =
+  Yojson.Safe.to_file "critical_capabilities.json" (Country.critical_capabilities_to_yojson test_cc_1) *)
+
+
+module TestLoadData = struct
+  let filepath = "../../../tests/test_cards.json"
+end
+
+module TestDeck = Game.MakeDeck(TestLoadData)
+
+(* Serialize / deserialize tests *)
 
 let test_serialize_deserialize_parameters_1 _ = 
   let result_json = Country.parameters_to_yojson test_parameters_1 in
@@ -331,11 +358,51 @@ let test_country_of_to_yojson_2 _ =
         assert_equal result_str country_str_2_correct
     | Error _ -> failwith "should not be aor_map"
 
-let country_tests =
-  "Country tests" 
+
+(* Create test_country that is loaded from tests/country.json *)
+let test_country = TestCountry.create () |> List.hd_exn
+
+(* Country tests *)
+let test_create_country_length_1 _ =
+  let data_list = TestCountry.create () in
+  assert_equal (List.length data_list) 1
+
+let test_country_player_name _ =
+  assert_equal (TestCountry.get_player_name test_country) "US"
+
+let test_country_force_size _ =
+  assert_equal (TestCountry.get_force_size test_country) 3
+
+let test_country_force_in_region _ =
+  assert_equal (TestCountry.get_force_in_region test_country "CONUS") 50
+  
+
+(* Serialize / deserialize game tests *)
+
+let test_card_of_to_yojson _ =
+  let yojson_obj = Yojson.Safe.from_string card_str_1 in
+  let result_json = Game.card_of_yojson yojson_obj in
+  match result_json with
+    | Ok card ->
+        let yojson_result = Game.card_to_yojson card in
+        let result_str = Yojson.Safe.to_string yojson_result in
+        assert_equal result_str card_str_1_correct
+    | Error _ -> failwith "should be card"
+
+let test_deck = TestDeck.load_cards()
+
+let test_load_cards _ =
+  assert_equal (TestDeck.get_size test_deck) 2
+
+(* TODO: Fix vacuously true *)
+let test_sorted_by _ =
+  assert_equal (TestDeck.sorted_by test_deck "ascending") test_deck
+
+let yojson_country_tests =
+  "Serialize / deserialize tests" 
   >::: [
     (* "setup" >:: test_setup; *)
-    "run serialize" >:: run_serialize;
+    (* "run serialize" >:: run_serialize; *)
     "test serialize/deserialize params 1" >:: test_serialize_deserialize_parameters_1;
     "test serialize/deserialize params 2" >:: test_serialize_deserialize_parameters_2;
     "test serialize/deserialize cc 1" >:: test_serialize_deserialize_cc_1;
@@ -355,6 +422,22 @@ let country_tests =
     "test country of_to yojson 2" >:: test_country_of_to_yojson_2;
   ]
 
-let all_tests = "Command Converse Tests " >::: [country_tests]
+let country_tests =
+  "Country Module tests" 
+  >::: [
+    "test create country size is 1" >:: test_create_country_length_1;
+    "test create country -> player name" >:: test_country_player_name;
+    "test create country -> force size" >:: test_country_force_size;
+    "test create country -> force in region" >:: test_country_force_in_region;
+  ]
+
+let yojson_game_tests =
+  "Serialize / deserialize tests" 
+  >::: [
+    "test card to / of yojson" >:: test_card_of_to_yojson;
+    "test load cards - size 2" >:: test_load_cards;
+    "test sorted by" >:: test_sorted_by;
+  ]
+let all_tests = "Command Converse Tests " >::: [yojson_country_tests ; country_tests; yojson_game_tests]
 let () =
   run_test_tt_main all_tests

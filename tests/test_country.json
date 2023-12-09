@@ -1,0 +1,32 @@
+[
+  {
+    "name": "US",
+    "parameters": {
+        "force_size": 3,
+        "national_tech_level": 1,
+        "resources": 5,
+        "per_turn_resources": 9,
+        "influence_points": 8
+    },
+    "combat_resources": {
+      "critical_capabilities": {
+          "lrf": 13,
+          "c4isr": 2,
+          "iamd_bmd": 10,
+          "sof": 5,
+          "nuclear_forces": 3
+      },
+      "forces": {
+          "CONUS": 50,
+          "INDOPACOM_PRC": 100,
+          "INDOPACOM_DPRK": 250,
+          "CENTCOM_IRAN": 80,
+          "CENTCOM_AFGHANISTAN": 200,
+          "CENTCOM_IRAQ": 60,
+          "EUCOM_RU": 70
+      }
+    },
+    "npc": true,
+    "affiliation": "red"
+  }
+]
