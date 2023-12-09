@@ -13,7 +13,7 @@
   responsibility modifiers.                                     
                                                                              
 ******************************************************************************)
-(* open Core *)
+open Core
 
 type parameters = {
   force_size : int;
@@ -23,6 +23,9 @@ type parameters = {
   influence_points: int;
 }
 
+val parameters_to_yojson : parameters -> Yojson.Safe.t
+val parameters_of_yojson : Yojson.Safe.t -> (parameters, string) result
+
 type critical_capabilities = {
   lrf: int;
   c4isr: int;
@@ -31,40 +34,30 @@ type critical_capabilities = {
   nuclear_forces: int;
 }
 
-(* type aor = CONUS | INDOPACOM_PRC | INDOPACOM_DPRK | CENTCOM_IRAN | CENTCOM_AFGHANISTAN | CENTCOM_IRAQ | EUCOM_RU *)
-(* type country_name = US | NATO_EU | PRC | RU | DPRK | IR *)
-(* type affiliation = RED | BLUE | WHITE *)
+val critical_capabilities_to_yojson : critical_capabilities -> Yojson.Safe.t
+val critical_capabilities_of_yojson : Yojson.Safe.t -> (critical_capabilities, string) result
 
-(* Fix this deriving situation later *)
-(* module type AOR_Key = sig
-  type t = aor
-  [@@deriving compare]
+
+module AreaKey : sig
+  type t
+  val of_string : string -> t
+  val to_string : t -> string
 end
 
-module AOR_Map = Map.Make(AOR_Key) *)
-
-(* module type AOR_Key = sig
-    type t = 
-    | CONUS 
-    | INDOPACOM_PRC
-    | INDOPACOM_DPRK
-    | CENTCOM_IRAN
-    | CENTCOM_AFGHANISTAN
-    | CENTCOM_IRAQ
-    | EUCOM_RU
-  val sexp_of_t : t -> Sexp.t
-  val t_of_sexp : Sexp.t -> t
-  val compare : t -> t -> int
-  
-end *)
+module AORMap : Core.Map.S with type Key.t = AreaKey.t
 
 type aor_map
 
+val aor_map_to_yojson: aor_map -> Yojson.Safe.t
+val aor_map_of_yojson: Yojson.Safe.t -> (aor_map, string) result
 
 type combat_resources = {
   critical_capabilities: critical_capabilities;
   forces: aor_map
 }
+
+val combat_resources_to_yojson: combat_resources -> Yojson.Safe.t
+val combat_resources_of_yojson: Yojson.Safe.t -> (combat_resources, string) result
 
 type country_data = {
   name: string;
@@ -73,6 +66,14 @@ type country_data = {
   npc: bool;
   affiliation: string;
 }
+
+val country_data_to_yojson: country_data -> Yojson.Safe.t
+val country_data_of_yojson: Yojson.Safe.t -> (country_data, string) result
+
+(* type aor = CONUS | INDOPACOM_PRC | INDOPACOM_DPRK | CENTCOM_IRAN | CENTCOM_AFGHANISTAN | CENTCOM_IRAQ | EUCOM_RU *)
+(* type country_name = US | NATO_EU | PRC | RU | DPRK | IR *)
+(* type affiliation = RED | BLUE | WHITE *)
+
 
 
 module type Country = sig

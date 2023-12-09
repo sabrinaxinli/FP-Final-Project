@@ -7,8 +7,9 @@
 (library
  (name game)
  (modules game)
- (modules_without_implementation game)
- (libraries core country))
+ ; (modules_without_implementation game)
+ (libraries core country)
+ (preprocess (pps ppx_jane ppx_deriving_yojson)))
 
 (library
  (name gamestate)
