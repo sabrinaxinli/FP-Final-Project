@@ -1,21 +1,20 @@
 [
-    {
-        "card_type" : "ACTION",
-        "title" : "Gray Zone Pressure on INDOPACOM",
-        "description" : "If unopposed, U.S. -1 IP and PRC resolve on Red Advantage column. PRC -2 on all regional economic development die rools for 1 turn. May play every turn.",
-        "card_number" : 1,
-        "aor": "PRC",
-        "public": false,
-        "play_cost": 3
-    },
-
-    {
-        "card_type" : "ACTION",
-        "title" : "Silk Road Economic Belt",
-        "description" : "China attempts to gain greater global influence through the Silk Road Economic Belt, which focuses on land infrastructure connections between China and Eurasia. Attempt to partner with Russia... May play every turn.",
-        "card_number" : 17,
-        "aor": "PRC",
-        "public": false,
-        "play_cost": 3
-    }
+	{
+		"card_type": "ACTION",
+		"title": "Gray Zone Pressure on INDOPACOM",
+		"description": "If unopposed, U.S. -1 IP and PRC resolve on Red Advantage column. PRC -2 on all regional economic development die rools for 1 turn. May play every turn.",
+		"card_number": 1,
+		"aor": "PRC",
+		"public": false,
+		"play_cost": 3
+	},
+	{
+		"card_type": "ACTION",
+		"title": "Silk Road Economic Belt",
+		"description": "China attempts to gain greater global influence through the Silk Road Economic Belt, which focuses on land infrastructure connections between China and Eurasia. Attempt to partner with Russia... May play every turn.",
+		"card_number": 17,
+		"aor": "PRC",
+		"public": false,
+		"play_cost": 3
+	}
 ]

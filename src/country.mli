@@ -46,23 +46,37 @@ end
 
 module AORMap : Core.Map.S with type Key.t = AreaKey.t
 
+type force = {
+  force_factor: int;
+  modernization_level: int;
+  readiness: float;
+}
+
+val force_equal: force -> force -> bool
+
+val force_to_yojson: force -> Yojson.Safe.t
+val force_of_yojson: Yojson.Safe.t -> (force, string) result
+
 type aor_map
 
 val aor_map_to_yojson: aor_map -> Yojson.Safe.t
 val aor_map_of_yojson: Yojson.Safe.t -> (aor_map, string) result
 
-type combat_resources = {
-  critical_capabilities: critical_capabilities;
-  forces: aor_map
-}
+type country_name = US | NATO_EU | PRC | RU | DPRK | IR
+type affiliation = RED | BLUE | WHITE
 
-val combat_resources_to_yojson: combat_resources -> Yojson.Safe.t
-val combat_resources_of_yojson: Yojson.Safe.t -> (combat_resources, string) result
+val country_name_to_yojson: country_name -> Yojson.Safe.t
+val country_name_of_yojson: Yojson.Safe.t -> (country_name, string) result
+
+val affiliation_to_yojson: affiliation -> Yojson.Safe.t
+val affiliation_of_yojson: Yojson.Safe.t -> (affiliation, string) result
+
 
 type country_data = {
   name: string;
   parameters: parameters;
-  combat_resources: combat_resources;
+  critical_capabilities: critical_capabilities;
+  forces: aor_map;
   npc: bool;
   affiliation: string;
 }
@@ -77,11 +91,11 @@ val country_data_of_yojson: Yojson.Safe.t -> (country_data, string) result
 
 
 module type Country = sig
-  type t = country_data
+  type t
   val create: unit -> t list
   val get_player_name : t -> string
   val get_force_size : t -> int
-  val get_force_in_region: t -> string -> int
+  val get_force_in_region: t -> string -> force list
   val get_national_tech_level: t -> int
   val get_resources: t -> int
   val get_per_turn_resources: t -> int
@@ -96,8 +110,8 @@ module type Country = sig
   val get_npc: t -> bool
   val get_action: t -> string
   (* Combat and force maintenance procedures *)
-  val procure_forces: t -> t
-  val modernize_forces: t -> t
+  val procure_forces: t -> string -> force -> int -> t
+  val modernize_forces: t -> string -> force -> int -> int -> t
   val deploy_forces: t -> t
   val apply_combat_results: t -> t
   val update_resources: t -> t

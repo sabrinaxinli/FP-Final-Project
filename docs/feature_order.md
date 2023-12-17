@@ -2,7 +2,7 @@
 1. Default scenario json files (table A.1 in the instructions)
 2. Implement scenario file parsing / loading
 3. Implement default scenario victory conditions
-4. Define five Action / Investment cards for Blue players, five Action / Investment cards for Red players, and three Event cards for White Cell
+4. Define five Action / Investment cards for Blue players, five Action / Investment cards for Red players, and three Event cards for White Cell with no-op actions for now
 5. Implement Deck modules and functors
 6. Implement client / server echo, and demonstrate transmiting card actions back/forth
 7. Implement Country module and functor

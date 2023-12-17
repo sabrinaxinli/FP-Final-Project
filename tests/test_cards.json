@@ -4,9 +4,9 @@
         "title" : "Card Title",
         "description" : "description of card",
         "card_number" : 1,
-        "aor": "AOR Area",
         "public": false,
-        "play_cost": 3
+        "play_cost": 3,
+		"replayable": true
     },
 
     {
@@ -16,6 +16,7 @@
         "card_number" : 1,
         "aor": "AOR Area",
         "public": false,
-        "play_cost": 3
+        "play_cost": 3,
+		"replayable": false
     }
 ]

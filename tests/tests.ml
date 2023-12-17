@@ -229,11 +229,12 @@ let card_str_1 = {|
     "card_number" : 1,
     "aor": "AOR Area",
     "public": false,
-    "play_cost": 3
+    "play_cost": 3,
+    "replayable":true
   }
 |}
 
-let card_str_1_correct = {|{"card_type":"ACTION","title":"Card Title","description":"description of card","card_number":1,"aor":"AOR Area","public":false,"play_cost":3}|}
+let card_str_1_correct = {|{"card_type":"ACTION","title":"Card Title","description":"description of card","card_number":1,"aor":"AOR Area","public":false,"play_cost":3,"replayable":true}|}
 (* let run_serialize _ =
   Yojson.Safe.to_file "critical_capabilities.json" (Country.critical_capabilities_to_yojson test_cc_1) *)
 
@@ -317,7 +318,7 @@ let test_aor_map_to_yojson_2 _ =
         assert_equal result_str aor_map_correct_str_2
     | Error _ -> failwith "should not be aor_map"
 
-let test_combat_resources_of_to_yojson_1 _ =
+(* let test_combat_resources_of_to_yojson_1 _ =
   let yojson_str = Yojson.Safe.from_string combat_resource_str_1 in
   let combat_resource_result = Country.combat_resources_of_yojson yojson_str in
   match combat_resource_result with
@@ -335,7 +336,7 @@ let test_combat_resources_of_to_yojson_2 _ =
         let yojson = Country.combat_resources_to_yojson combat_resource in
         let result_str = Yojson.Safe.to_string yojson in
         assert_equal result_str combat_resource_str_2_correct
-    | Error _ -> failwith "should not be aor_map"
+    | Error _ -> failwith "should not be aor_map" *)
 
 let test_country_of_to_yojson_1 _ =
   let yojson_str = Yojson.Safe.from_string country_str_1 in
@@ -372,9 +373,9 @@ let test_country_player_name _ =
 let test_country_force_size _ =
   assert_equal (TestCountry.get_force_size test_country) 3
 
-let test_country_force_in_region _ =
+(* let test_country_force_in_region _ =
   assert_equal (TestCountry.get_force_in_region test_country "CONUS") 50
-  
+   *)
 
 (* Serialize / deserialize game tests *)
 
@@ -415,8 +416,8 @@ let yojson_country_tests =
     "test area_key of / to string valid - EUCOM_RU" >:: test_area_key_of_to_string_valid_EUCOM_RU;
     "test aor_map_to_yojson_1" >:: test_aor_map_to_yojson_1;
     "test aor_map_to_yojson_2" >:: test_aor_map_to_yojson_2;
-    "test combat_resources of_to yojson 1" >:: test_combat_resources_of_to_yojson_1;
-    "test combat_resources of_to yojson 2" >:: test_combat_resources_of_to_yojson_2;
+    (* "test combat_resources of_to yojson 1" >:: test_combat_resources_of_to_yojson_1;
+    "test combat_resources of_to yojson 2" >:: test_combat_resources_of_to_yojson_2; *)
     "test country of_to yojson 1" >:: test_country_of_to_yojson_1;
     "test country of_to yojson 2" >:: test_country_of_to_yojson_2;
   ]
@@ -427,7 +428,7 @@ let country_tests =
     "test create country size is 1" >:: test_create_country_length_1;
     "test create country -> player name" >:: test_country_player_name;
     "test create country -> force size" >:: test_country_force_size;
-    "test create country -> force in region" >:: test_country_force_in_region;
+    (* "test create country -> force in region" >:: test_country_force_in_region; *)
   ]
 
 let yojson_game_tests =

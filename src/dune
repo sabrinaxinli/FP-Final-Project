@@ -1,7 +1,13 @@
 (library
+ (name table)
+ (modules table)
+ (libraries core)
+ (preprocess (pps ppx_jane)))
+
+(library
  (name country)
  (modules country)
- (libraries core)
+ (libraries core table)
  (preprocess (pps ppx_jane ppx_deriving_yojson)))
 
 ; (library
