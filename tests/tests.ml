@@ -368,10 +368,10 @@ let test_create_country_length_1 _ =
   assert_equal (List.length data_list) 1
 
 let test_country_player_name _ =
-  assert_equal (TestCountry.get_player_name test_country) "US"
+  assert_equal test_country.name "US"
 
 let test_country_force_size _ =
-  assert_equal (TestCountry.get_force_size test_country) 3
+  assert_equal test_country.parameters.force_size 3
 
 (* let test_country_force_in_region _ =
   assert_equal (TestCountry.get_force_in_region test_country "CONUS") 50

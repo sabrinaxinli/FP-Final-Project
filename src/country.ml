@@ -19,7 +19,7 @@ type critical_capabilities = {
 } [@@deriving yojson]
 
 module AreaKey = struct
-  type t = 
+  type t =
   | CONUS
   | INDOPACOM_PRC
   | INDOPACOM_DPRK
@@ -56,8 +56,6 @@ let aor_map_to_yojson (m: aor_map) : Yojson.Safe.t =
     let regional_forces = List.fold force_list ~init:[] ~f:(fun acc ele -> (force_to_yojson ele) :: acc) in
     (AreaKey.to_string k), (`List regional_forces)))
 
-    open Core
-
 let aor_map_of_yojson (json: Yojson.Safe.t) : (aor_map, string) result = 
   let open Result.Monad_infix in
   match json with 
@@ -89,23 +87,9 @@ type country_data = {
 } [@@deriving yojson]
 
 module type Country = sig
-  type t
+  type t = country_data
   val create: unit -> t list
-  val get_player_name : t -> string
-  val get_force_size : t -> int
   val get_force_in_region: t -> string -> force list
-  val get_national_tech_level: t -> int
-  val get_resources: t -> int
-  val get_per_turn_resources: t -> int
-  val get_influence_points: t -> int
-  val get_lrf: t -> int
-  val get_c4isr: t -> int
-  val get_iamd_bmd: t -> int
-  val get_sof: t -> int
-  val get_nuclear_forces: t -> int
-  val get_ip: t -> int
-  val get_npc: t -> bool
-  val get_proposed_action: t -> string
 
   (* Combat and force maintenance procedures *)
   val procure_forces: t -> string -> force -> int -> t
@@ -113,6 +97,7 @@ module type Country = sig
   val deploy_forces: t -> (string * string * force) list -> int list -> t
   val apply_combat_results: t -> string * force list -> Table.outcome -> bool -> int -> int -> t
   val update_resources: t -> int -> t
+  val buyback_readiness: t -> string * force list -> int -> t
 end
 
 module MakeCountry (State : sig val initial_data: string end) : Country = struct
@@ -129,60 +114,17 @@ module MakeCountry (State : sig val initial_data: string end) : Country = struct
       | `List lst -> deserialize_country_list lst
       | _ -> failwith "Did not find json list"
 
-  let get_player_name (cd : t) : string =
-    cd.name
-
-  let get_force_size (cd : t) : int =
-    cd.parameters.force_size
-    
   let get_force_in_region (cd: t) (region: string): force list =
     Map.find_exn cd.forces (AreaKey.of_string region)
-  
-  let get_national_tech_level (cd: t) : int =
-    cd.parameters.national_tech_level
-  
-  let get_resources (cd: t) : int =
-    cd.parameters.resources
 
-  let get_per_turn_resources (cd: t) : int =
-    cd.parameters.per_turn_resources
-
-  let get_influence_points (cd: t) : int =
-    cd.parameters.influence_points
-
-  let get_lrf (cd: t) : int = 
-    cd.critical_capabilities.lrf
-  
-  let get_c4isr (cd: t) : int =
-    cd.critical_capabilities.c4isr
-
-  let get_iamd_bmd (cd: t): int =
-    cd.critical_capabilities.iamd_bmd
-
-  let get_sof (cd: t) : int =
-    cd.critical_capabilities.sof
-
-  let get_nuclear_forces (cd: t) : int =
-    cd.critical_capabilities.nuclear_forces
-  
-  let get_ip (cd: t) : int =
-    cd.parameters.influence_points
-  
-  let get_npc (cd: t) : bool =
-    cd.npc
-  
-  (* Need to implement recursive compilation; this needs to take in the gamestate and return a gamestate *)
-  (* This is a PROPOSED ACTION *)
-  let get_proposed_action (_: t) : string =
-    "MAKE THIS INTO A POLYMORPHIC VARIANT"
-    (* Card_number, procure_forces, modernize_forces, deploy_forces, readiness_buyback, initiate_combat *)
-
+  (* Main helper function for accessing nested data struct *)
   let update_troop_helper ~(map: aor_map) ~(region: string) ~(condition: force -> bool) ~(transform: force -> force option) ~(fallback: force -> force option) ~(default: unit -> (force list) option) : aor_map =
     Map.change map (AreaKey.of_string region) ~f:(function
       | Some troops -> Some (List.filter_map troops ~f:(fun record -> 
           if condition record then transform record else fallback record))
       | None -> default ())
 
+  (* Common params for main helper function *)
   let update_forces (cd : t) (region : string) (new_troop: force) (cost: int) ~(transform: force -> force option) ~(default: unit -> (force list) option) : t =
     let updated_params = { cd.parameters with resources = cd.parameters.resources - cost } in
     let updated_map = 
@@ -196,13 +138,14 @@ module MakeCountry (State : sig val initial_data: string end) : Country = struct
     in
     { cd with parameters = updated_params; forces = updated_map }
 
+  (* Combat and force maintenance procedures *)
+  (* This is the result of an ACCEPTED ACTION - the player does not do this themselves; a check is needed for RP and mod_level *)
+
   let procure_forces (cd : t) (region: string) (new_troop: force) (cost: int): t =
     update_forces cd region new_troop cost
     ~transform: (fun record -> Some {record with force_factor = record.force_factor + new_troop.force_factor})
     ~default: (fun () -> Some [{ new_troop with force_factor = new_troop.force_factor }])
-  
-  (* Combat and force maintenance procedures *)
-  (* This is the result of an ACCEPTED ACTION - the player does not do this themselves; a check is needed for RP and mod_level *)
+
 
   (* A check is needed by the facilitator for RP and mod level *)
   let modernize_forces (cd : t) (region : string) (new_troop: force) (upgrade : int) (cost: int): t =

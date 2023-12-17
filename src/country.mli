@@ -49,7 +49,8 @@ module AORMap : Core.Map.S with type Key.t = AreaKey.t
 type force = {
   force_factor: int;
   modernization_level: int;
-  readiness: float;
+  readiness: int;
+  pinned: int;
 }
 
 val force_equal: force -> force -> bool
@@ -74,11 +75,12 @@ val affiliation_of_yojson: Yojson.Safe.t -> (affiliation, string) result
 
 type country_data = {
   name: string;
+  home_region: string;
   parameters: parameters;
   critical_capabilities: critical_capabilities;
   forces: aor_map;
   npc: bool;
-  affiliation: string;
+  affiliation: affiliation;
 }
 
 val country_data_to_yojson: country_data -> Yojson.Safe.t
@@ -88,35 +90,19 @@ val country_data_of_yojson: Yojson.Safe.t -> (country_data, string) result
 (* type country_name = US | NATO_EU | PRC | RU | DPRK | IR *)
 (* type affiliation = RED | BLUE | WHITE *)
 
-
-
 module type Country = sig
-  type t
-  val create: unit -> t list
-  val get_player_name : t -> string
-  val get_force_size : t -> int
-  val get_force_in_region: t -> string -> force list
-  val get_national_tech_level: t -> int
-  val get_resources: t -> int
-  val get_per_turn_resources: t -> int
-  val get_influence_points: t -> int
-  val get_lrf: t -> int
-  val get_c4isr: t -> int
-  val get_iamd_bmd: t -> int
-  val get_sof: t -> int
-  val get_nuclear_forces: t -> int
-  val get_aor: t -> string -> int
-  val get_ip: t -> int
-  val get_npc: t -> bool
-  val get_action: t -> string
-  (* Combat and force maintenance procedures *)
-  val procure_forces: t -> string -> force -> int -> t
-  val modernize_forces: t -> string -> force -> int -> int -> t
-  val deploy_forces: t -> t
-  val apply_combat_results: t -> t
-  val update_resources: t -> t
-  
-end
+    type t = country_data
+    val create: unit -> t list
+    val get_force_in_region: t -> string -> force list
+    
+    (* Combat and force maintenance procedures *)
+    val procure_forces: t -> string -> force -> int -> t
+    val modernize_forces: t -> string -> force -> int -> int -> t
+    val deploy_forces: t -> (string * string * force) list -> int list -> t
+    val apply_combat_results: t -> string * force list -> Table.outcome -> bool -> int -> int -> t
+    val update_resources: t -> int -> t
+    val buyback_readiness: t -> string * force list -> int -> t
+    end
 
 module MakeCountry (_ : sig val initial_data: string end) : Country
 
