@@ -1,7 +1,7 @@
 (test
  (name table_tests)
  (modules table_tests)
- (libraries ounit2 core table)
+ (libraries ounit2 core resolution)
  (preprocess
   (pps ppx_jane)))
 

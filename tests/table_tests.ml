@@ -1,5 +1,5 @@
 open OUnit2
-open Table
+open Resolution
 
 let test_resolve_combat_blue_adv _ =
   (* > 4:1 *)

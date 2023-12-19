@@ -40,6 +40,11 @@ module AreaKey = struct
       Sexp.of_string str |> t_of_sexp |> Option.some
     with
     | _ -> None
+
+  let is_region (str: string) : bool =
+    match of_string str with
+      | Some _ -> true
+      | None -> false
   
   let to_string (key: t) : string =
     (sexp_of_t key) |> Sexp.to_string
@@ -98,15 +103,18 @@ type country_data = {
 module type Country = sig
   type t = country_data
   val create: string -> t list
-  val get_force_in_region: t -> string -> force list
+  val get_force_in_region: t -> string -> force list option
+  val has_force: t -> string -> force -> bool
+  val get_turn_resources: t -> t
 
   (* Combat and force maintenance procedures *)
   val procure_forces: t -> string -> force -> int -> t
   val modernize_forces: t -> string -> force -> int -> int -> t
-  val deploy_forces: t -> (string * string * force) list -> int list -> t
+  val deploy_forces: t -> (string * string * force list) -> int -> t
   val apply_combat_results: t -> string * force list -> Resolution.outcome -> bool -> int -> int -> t
   val update_resources: t -> int -> t
-  val buyback_readiness: t -> string * force list -> int -> t
+  val buyback_readiness: t -> string * force list -> int -> int -> t
+  val can_afford: t -> Resolution.ActionCostImpl.t -> Resolution.tabletype -> int * int -> int option
 end
 
 module CountryImpl : Country = struct
@@ -123,8 +131,22 @@ module CountryImpl : Country = struct
       | `List lst -> deserialize_country_list lst
       | _ -> failwith "Did not find json list"
 
-  let get_force_in_region (cd: t) (region: string): force list =
-    Map.find_exn cd.forces (AreaKey.of_string_exn region)
+  let get_force_in_region (cd: t) (region: string): force list option =
+    let open Option.Let_syntax in
+    (AreaKey.of_string region) >>= Map.find cd.forces
+
+  let has_force (cd : t) (region: string) (troop: force) : bool =
+    let open Option.Let_syntax in
+    match (get_force_in_region cd region) >>= List.find ~f:(fun force -> force_equal troop force) with
+      | Some _ -> true
+      | None -> false
+
+  let update_resources (cd : t) (amount : int) : t =
+    let updated_params = {cd.parameters with resources = cd.parameters.resources + amount} in
+    {cd with parameters = updated_params}
+
+  let get_turn_resources (cd : t) : t =
+    update_resources cd cd.parameters.per_turn_resources
 
   (* Main helper function for accessing nested data struct *)
   let update_troop_helper ~(map: aor_map) ~(region: string) ~(condition: force -> bool) ~(transform: force -> force option) ~(fallback: force -> force option) ~(default: unit -> (force list) option) : aor_map =
@@ -162,13 +184,22 @@ module CountryImpl : Country = struct
     ~transform: (fun record -> Some {record with modernization_level = record.modernization_level + upgrade})
     ~default: (fun () -> None)
 
-  let deploy_forces (cd : t) (source_dest_troop: (string * string * force) list) (costs: int list): t =
+  (* let deploy_forces (cd : t) (source_dest_troop: (string * string * force) list) (costs: int list): t =
     List.fold (List.zip_exn source_dest_troop costs) ~init:cd ~f:(fun acc ((source, dest, troop), cost) ->
       update_forces acc source troop cost 
       ~transform: (fun record -> if record.force_factor = troop.force_factor then None else Some {record with force_factor = record.force_factor - troop.force_factor}) 
       ~default: (fun () -> None) |>
       (fun m -> procure_forces m dest troop 0)
-    )
+    ) *)
+
+  let deploy_forces (cd : t) (source_dest_troops: string * string * force list) (cost: int): t =
+    let (source, dest, force_list) = source_dest_troops in
+    (List.fold force_list ~init:cd ~f:(fun acc troop -> 
+      update_forces acc source troop 0
+      ~transform: (fun record -> if record.force_factor = troop.force_factor then None else Some {record with force_factor = record.force_factor - troop.force_factor})
+      ~default: (fun () -> None) |>
+      (fun m -> procure_forces m dest troop 0))) |>
+    (fun updated -> update_resources updated (-cost))
 
   let apply_combat_results (cd : t) (involved: string * force list) (battle_result: Resolution.outcome) (reset: bool) (pinned: int) (ip_change: int): t =
     let updated_params = {cd.parameters with influence_points = cd.parameters.influence_points + ip_change} in
@@ -177,8 +208,8 @@ module CountryImpl : Country = struct
       let withdrawn_troops = if reset then troop.force_factor / 2 else 0 in
       let result_readiness = if String.equal cd.name "US" then
           match battle_result with
-            | RED_MAJOR_GAIN -> max (troop.readiness - 3) 0
-            | RED_MINOR_GAIN -> max (troop.readiness - 2) 0
+            | Resolution.RED_MAJOR_GAIN -> max (troop.readiness - 3) 0
+            | Resolution.RED_MINOR_GAIN -> max (troop.readiness - 2) 0
             | _ -> max (troop.readiness - 1) 0
         else
           0
@@ -190,27 +221,22 @@ module CountryImpl : Country = struct
     ) in
     {result with parameters = updated_params}
 
-  let update_resources (cd : t) (amount : int) : t =
-    let updated_params = {cd.parameters with resources = cd.parameters.resources + amount} in
-    {cd with parameters = updated_params}
-
-  let buyback_readiness (cd : t) (troop: string * force list) (readiness: int): t =
+  let buyback_readiness (cd : t) (troop: string * force list) (readiness: int) (cost: int): t =
     let (region, units) = troop in
-    let total_troops = List.fold units ~init:0 ~f:(fun acc x -> acc + x.force_factor) in
-    let cost =
-      if String.equal cd.name "US" then
-          if String.equal region "CONUS" then 
-            (total_troops + readiness) 
-          else int_of_float (Float.round_up (float_of_int total_troops *. 1.3) +. Float.round_down (float_of_int readiness *. 1.2))
-      else
-        total_troops
-    in
     List.fold units ~init:cd ~f:(fun acc curr -> 
       update_forces acc region curr 0
       ~transform: (fun record -> Some {record with readiness = record.readiness + readiness})
       ~default: (fun () -> None)
     ) |>
     (fun x -> update_resources x (-cost))
+
+  let can_afford (cd: t) (res_tables : Resolution.ActionCostImpl.t) (action_type: Resolution.tabletype) (key : int * int) : int option =
+    let open Option.Let_syntax in
+    Resolution.ActionCostImpl.get_cost res_tables action_type key >>=
+    (fun cost -> if cd.parameters.resources >= cost then Some cost else None)
+
+  (* let get_combat_factors (cd : t) : int = *)
+
 
 end
 

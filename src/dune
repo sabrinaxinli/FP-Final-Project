@@ -19,7 +19,7 @@
 (library
  (name game)
  (modules game)
- (libraries core country resolution)
+ (libraries core country resolution core_unix core_unix.sys_unix)
  (preprocess (pps ppx_jane ppx_deriving_yojson)))
 
 (library

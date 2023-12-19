@@ -16,7 +16,7 @@
 open Core
 
 type parameters = {
-  force_size : int;
+  modifier : int;
   national_tech_level: int;
   resources: int;
   per_turn_resources: int;
@@ -40,8 +40,9 @@ val critical_capabilities_of_yojson : Yojson.Safe.t -> (critical_capabilities, s
 
 module AreaKey : sig
   type t
-  val of_string : string -> t
+  val of_string : string -> t option
   val to_string : t -> string
+  val is_region: string -> bool
 end
 
 module AORMap : Core.Map.S with type Key.t = AreaKey.t
@@ -91,18 +92,21 @@ val country_data_of_yojson: Yojson.Safe.t -> (country_data, string) result
 (* type affiliation = RED | BLUE | WHITE *)
 
 module type Country = sig
-    type t = country_data
-    val create: string -> t list
-    val get_force_in_region: t -> string -> force list
-    
-    (* Combat and force maintenance procedures *)
-    val procure_forces: t -> string -> force -> int -> t
-    val modernize_forces: t -> string -> force -> int -> int -> t
-    val deploy_forces: t -> (string * string * force) list -> int list -> t
-    val apply_combat_results: t -> string * force list -> Resolution.outcome -> bool -> int -> int -> t
-    val update_resources: t -> int -> t
-    val buyback_readiness: t -> string * force list -> int -> t
-end
+	type t = country_data
+	val create: string -> t list
+	val get_force_in_region: t -> string -> force list option
+	val has_force: t -> string -> force -> bool
+	val get_turn_resources: t -> t
+  
+	(* Combat and force maintenance procedures *)
+	val procure_forces: t -> string -> force -> int -> t
+	val modernize_forces: t -> string -> force -> int -> int -> t
+	val deploy_forces: t -> (string * string * force list) -> int -> t
+	val apply_combat_results: t -> string * force list -> Resolution.outcome -> bool -> int -> int -> t
+	val update_resources: t -> int -> t
+	val buyback_readiness: t -> string * force list -> int -> int -> t
+	val can_afford: t -> Resolution.ActionCostImpl.t -> Resolution.tabletype -> int * int -> int option
+  end
 
 module CountryImpl : Country
 
