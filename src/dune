@@ -1,31 +1,25 @@
+; (library
+;  (name cord)
+;  (modules cord)
+;  (libraries core)
+;  (preprocess (pps ppx_jane)))
+
 (library
- (name table)
- (modules table)
+ (name resolution)
+ (modules resolution)
  (libraries core)
  (preprocess (pps ppx_jane)))
 
 (library
  (name country)
  (modules country)
- (libraries core table)
+ (libraries core resolution)
  (preprocess (pps ppx_jane ppx_deriving_yojson)))
-
-; (library
-;  (name game)
-;  (modules game)
-;  (modules_without_implementation game)
-;  (libraries core country))
-
-; (library
-;  (name gamestate)
-;  (modules gamestate)
-;  (modules_without_implementation gamestate)
-;  (libraries core game))
 
 (library
  (name game)
  (modules game)
- (libraries core country)
+ (libraries core country resolution)
  (preprocess (pps ppx_jane ppx_deriving_yojson)))
 
 (library

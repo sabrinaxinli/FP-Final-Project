@@ -92,17 +92,19 @@ val country_data_of_yojson: Yojson.Safe.t -> (country_data, string) result
 
 module type Country = sig
     type t = country_data
-    val create: unit -> t list
+    val create: string -> t list
     val get_force_in_region: t -> string -> force list
     
     (* Combat and force maintenance procedures *)
     val procure_forces: t -> string -> force -> int -> t
     val modernize_forces: t -> string -> force -> int -> int -> t
     val deploy_forces: t -> (string * string * force) list -> int list -> t
-    val apply_combat_results: t -> string * force list -> Table.outcome -> bool -> int -> int -> t
+    val apply_combat_results: t -> string * force list -> Resolution.outcome -> bool -> int -> int -> t
     val update_resources: t -> int -> t
     val buyback_readiness: t -> string * force list -> int -> t
-    end
+end
 
-module MakeCountry (_ : sig val initial_data: string end) : Country
+module CountryImpl : Country
+
+(* module MakeCountry (_ : sig val initial_data: string end) : Country *)
 

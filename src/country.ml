@@ -3,7 +3,7 @@ open Core
 
 
 type parameters = {
-  force_size : int;
+  modifier : int;
   national_tech_level: int;
   resources: int;
   per_turn_resources: int;
@@ -29,8 +29,17 @@ module AreaKey = struct
   | EUCOM_RU
   [@@deriving sexp, compare]
 
-  let of_string (str: string) : t =
-    Sexp.of_string str |> t_of_sexp
+  let of_string_exn (str: string) : t =
+    try
+      Sexp.of_string str |> t_of_sexp
+    with
+      | _ -> failwith ("AreaKey.of_string_exn: unknown key '" ^ str ^ "'")
+
+  let of_string (str: string) : t option =
+    try
+      Sexp.of_string str |> t_of_sexp |> Option.some
+    with
+    | _ -> None
   
   let to_string (key: t) : string =
     (sexp_of_t key) |> Sexp.to_string
@@ -67,7 +76,7 @@ let aor_map_of_yojson (json: Yojson.Safe.t) : (aor_map, string) result =
           force_of_yojson r_f >>=
           fun troop -> Ok (troop :: forces)
         ) >>=
-        fun forces -> Ok (Map.add_exn map ~key:(AreaKey.of_string k) ~data:(List.rev forces))
+        fun forces -> Ok (Map.add_exn map ~key:(AreaKey.of_string_exn k) ~data:(List.rev forces))
       | _ -> Error "did not find list of forces"
     )
   | _ -> Error "JSON should be an assoc list"
@@ -88,19 +97,19 @@ type country_data = {
 
 module type Country = sig
   type t = country_data
-  val create: unit -> t list
+  val create: string -> t list
   val get_force_in_region: t -> string -> force list
 
   (* Combat and force maintenance procedures *)
   val procure_forces: t -> string -> force -> int -> t
   val modernize_forces: t -> string -> force -> int -> int -> t
   val deploy_forces: t -> (string * string * force) list -> int list -> t
-  val apply_combat_results: t -> string * force list -> Table.outcome -> bool -> int -> int -> t
+  val apply_combat_results: t -> string * force list -> Resolution.outcome -> bool -> int -> int -> t
   val update_resources: t -> int -> t
   val buyback_readiness: t -> string * force list -> int -> t
 end
 
-module MakeCountry (State : sig val initial_data: string end) : Country = struct
+module CountryImpl : Country = struct
   type t = country_data
 
   let deserialize_country_list (lst : Yojson.Safe.t list) : t list =
@@ -109,17 +118,17 @@ module MakeCountry (State : sig val initial_data: string end) : Country = struct
                     | Ok data -> data
                     | Error _ -> failwith "Error with element") lst
 
-  let create () : t list =
-    match Yojson.Safe.from_file (State.initial_data) with
+  let create (initial_data : string) : t list =
+    match Yojson.Safe.from_file (initial_data) with
       | `List lst -> deserialize_country_list lst
       | _ -> failwith "Did not find json list"
 
   let get_force_in_region (cd: t) (region: string): force list =
-    Map.find_exn cd.forces (AreaKey.of_string region)
+    Map.find_exn cd.forces (AreaKey.of_string_exn region)
 
   (* Main helper function for accessing nested data struct *)
   let update_troop_helper ~(map: aor_map) ~(region: string) ~(condition: force -> bool) ~(transform: force -> force option) ~(fallback: force -> force option) ~(default: unit -> (force list) option) : aor_map =
-    Map.change map (AreaKey.of_string region) ~f:(function
+    Map.change map (AreaKey.of_string_exn region) ~f:(function
       | Some troops -> Some (List.filter_map troops ~f:(fun record -> 
           if condition record then transform record else fallback record))
       | None -> default ())
@@ -161,7 +170,7 @@ module MakeCountry (State : sig val initial_data: string end) : Country = struct
       (fun m -> procure_forces m dest troop 0)
     )
 
-  let apply_combat_results (cd : t) (involved: string * force list) (battle_result: Table.outcome) (reset: bool) (pinned: int) (ip_change: int): t =
+  let apply_combat_results (cd : t) (involved: string * force list) (battle_result: Resolution.outcome) (reset: bool) (pinned: int) (ip_change: int): t =
     let updated_params = {cd.parameters with influence_points = cd.parameters.influence_points + ip_change} in
     let (region, troops) = involved in
     let result = List.fold troops ~init:cd ~f:(fun acc troop ->
@@ -201,7 +210,7 @@ module MakeCountry (State : sig val initial_data: string end) : Country = struct
       ~transform: (fun record -> Some {record with readiness = record.readiness + readiness})
       ~default: (fun () -> None)
     ) |>
-    (fun x -> update_resources x cost)
+    (fun x -> update_resources x (-cost))
 
 end
 

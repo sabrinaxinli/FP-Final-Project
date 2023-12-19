@@ -8,8 +8,6 @@ module Create_victory_condition : VictoryCondition *)
 
 open Core
 
-
-
 type card_type = ACTION | INVESTMENT | DOMESTIC_EVENT | INTERNATIONAL_EVENT [@@deriving yojson]
 
 
@@ -26,9 +24,13 @@ type card = {
   replayable: bool;
 } [@@deriving yojson]
 
-module PlayerCountryMap = Map.Make(String)
+let equal_card (c1: card) (c2: card) =
+  String.equal c1.card_number c2.card_number
 
-type player_country_map = Country.country_data PlayerCountryMap.t
+module StringMap = Map.Make(String)
+
+
+type player_country_map = Country.country_data StringMap.t
 
 type proposed_action =
   | PlayCards of string
@@ -40,12 +42,12 @@ type proposed_action =
   | Done
 [@@deriving yojson]
 
-type player_responses_map = (proposed_action list) PlayerCountryMap.t
+type player_responses_map = (proposed_action list) StringMap.t
 
 
-type player_decks = (card list) PlayerCountryMap.t
+type player_decks = (card list) StringMap.t
 
-type victory_conditions_map = bool PlayerCountryMap.t
+type victory_conditions_map = bool StringMap.t
 
 type game_data = {
   countries: player_country_map;
@@ -53,22 +55,31 @@ type game_data = {
   domestic_event_deck: card list;
   international_event_deck: card list;
   victory_conditions: victory_conditions_map;
-  current_turn: string
+  current_turn: string;
+  resolution_tables: Resolution.resolution_table;
 }
+
+type card_function = card -> game_data -> player_responses_map -> game_data
+
+type card_mapping = card_function StringMap.t
 
 module type Deck = sig
   type t = card
+  type m = card_mapping
 
-  val load_cards: unit -> t list (* Will contain logic for data loading for cards from specified path *)
+  val load_cards: string -> t list (* Will contain logic for data loading for cards from specified path *)
   val get_size: t list -> int
   val sorted_by: t list -> string -> t list (* string contains info to be sorted by *)
+  val build_card_mappings: unit -> m
+  val get_card_function: m -> string -> (card -> game_data -> player_responses_map -> game_data)
 
   (* Card mechanics *)
   val evaluate_card_result: t -> game_data -> player_responses_map -> game_data
 end
 
-module Deck = struct
+module Deck : Deck = struct
   type t = card
+  type m = card_mapping
 
   let deserialize_card_list (lst : Yojson.Safe.t list) : t list =
     List.map ~f:(fun ele -> 
@@ -88,11 +99,22 @@ module Deck = struct
   let sorted_by (card_list: t list) (_: string) : t list =
     card_list
 
+  let empty_action (prm: player_responses_map) (player_name : string) : bool =
+    List.length (Map.find_exn prm player_name) = 1
+
+  let build_card_mappings () : m =
+    StringMap.empty
+    |> Map.add_exn ~key:"PRC-01" ~data:(fun c gd prm ->
+      let modifier = if (empty_action prm "US") then red_advantage else none in
+      (* Use RT B *))
+
+  let get_card_function (map : m) (card_num: string) : (card -> game_data -> player_responses_map -> game_data) =
+    Map.find_exn map card_num
+
   (* This is purely for evaluating the result of the card. The players should be given the card info in the Gamestate module and
      allowed to respond first before this function is called. *)
   let evaluate_card_result (_ : t) (curr_state: game_data) (map : player_responses_map): game_data =
     curr_state
-
 end
 
 module type GameState = sig
@@ -110,11 +132,11 @@ module type GameState = sig
 	(* Red signaling -> Blue investments / action -> Red investments / action -> ... *)
 	val get_turn_stage: t -> string
 	(* Get a proposed action from a player, asking again until the proposed action is valid *)
-	val get_proposed_action: t -> string -> validator : (proposed_action -> bool) -> proposed_action
+	val get_proposed_action: t -> string -> validator : (t -> string -> proposed_action -> bool) -> proposed_action
 	(* Validate the proposed action *)
-	val validate_action: proposed_action -> bool
+	val validate_action: t -> string -> proposed_action -> bool
 	(* Validate specifically the proposed action in response to a played card *)
-	val validate_response: proposed_action -> bool
+	val validate_response: t -> string -> proposed_action -> bool
 	(* Play a card, let all involved players respond, and evaluate card result. *)
 	val play_card : t -> card -> t
 end
@@ -122,30 +144,72 @@ end
 module GameState = struct
   type t = game_data
 
+  let start_game ~(countries_fp: string) ~(player_decks_dir : string) ~(domestic_fp : string) ~(int_fp : string) : t =
+    let countries = PlayerCountryMap.empty in
+    let country_datas = Country.CountryImpl.create countries_fp in
+    let resolutions = Resolution.ActionCostImpl.get_table_map in
+    let player_decks = PlayerCountryMap.empty in
+    let domestic_event_deck = PlayerCountryMap.empty in
+    let international_event_deck = PlayerCountryMap.empty in
+    let victory_conditions = PlayerCountryMap.empty in
+    let current_turn = "Red Signalling" in
+    try
+      let deck_dirs = Core.Sys_unix.readdir
+    with
+    {countries = countries;
+    player_decks = player_decks;
+    domestic_event_deck = Deck.load_cards domestic_fp;
+    international_event_deck = Deck.load_cards int_fp;
+    victory_conditions = victory_conditions;
+    current_turn = "Red Signalling";
+    resolution_tables = resolutions}
+    
+
   let rec get_proposed_action (curr_state: t) (player_name: string) ~(validator: proposed_action -> bool): proposed_action =
     (* Instead of hard-coding the response from a player like below; add a server call *)
     (* I haven't yet written a serializer/deserializer for the player_country_map yet, but you can use the proposed_action
        serialize / deserializers to help *)
     let force_list : Country.force list = [{force_factor = 3; modernization_level = 1; readiness = 10; pinned = 0}] in
-    let player_response = DeployForces ("US", "EU", force_list) in
+    let player_response : proposed_action = DeployForces ("US", "EU", force_list) in (* of proposed_action *)
 
     if validator player_response then player_response else get_proposed_action curr_state player_name ~validator
 
-  let validate_action (act : proposed_action) : bool =
+  (* Helpers *)
+  let validate_card (gs: t) (player : string) (card_num : string) : bool =
+    let open Option.Let_syntax in
+    let found = Map.find gs.player_decks player >>= List.find ~f:(fun c -> String.equal c.card_number card_num) in
+    match found with
+      | Some c -> 
+          (match c.play_cost with
+            | Some cost -> (Map.find_exn gs.countries player).parameters.resources >= cost
+            | None -> true)
+      | None -> false
+
+  let validate_procurement (gs: t) (player: string) (wanted_force : string * Country.force) : bool =
+    let (_, force) = wanted_force in
+    let player_country = Map.find_exn gs.countries player in
+    if player_country.parameters.national_tech_level < force.modernization_level then false else
+      let cost = Resolution.ActionCostImpl.get_cost gs.resolution_tables Resolution.PROCUREMENT (force.force_factor, force.modernization_level) in
+      cost <= (Map.find_exn gs.countries player).parameters.resources
+  
+  let validate_modernization (gs: t) (player: string) (old_force : string * Country.force) : bool = 
+    
+
+  let validate_action (gs: t) (player: string) (act : proposed_action) : bool =
     match act with (* Add code for checking whether these params are actually valid *)
-      | PlayCards _ -> false
-      | ProcureForce _ -> false
+      | PlayCards c -> validate_card gs player c
+      | ProcureForce wanted_force -> validate_procurement gs player wanted_force
       | ModernizeForce _ -> false
       | DeployForces _ -> false
       | InitiateCombat _ -> false
       | BuybackReadiness _ -> false
       | Done -> true
 
-  let validate_response (response : proposed_action) : bool =
+  let validate_response (gs: t) (player: string) (response : proposed_action) : bool =
     match response with
       | DeployForces _
       | InitiateCombat _ 
-      | Done -> validate_action response
+      | Done -> validate_action gs player response
       | _ -> false
 
   let play_card (curr_state : t) (c : card): t =
@@ -153,12 +217,4 @@ module GameState = struct
       (* Add code for getting multiple response actions from each player *)
     ) |>
     (fun (new_state, response_map) -> Deck.evaluate_card_result c new_state response_map)
-end
-
-module type Adjudicator = sig
-  type t
-  val get_combat_factor: Country.country_data -> int
-  val get_combat_factor_ratio: Country.country_data -> Country.country_data -> int
-  val adjudicate_combat: Country.country_data -> Country.country_data -> (int * Country.country_data * Country.country_data) (* int signifying which side won, updated Country info *)
-  val adjudicate_noncombat: Country.country_data -> Country.country_data -> (Country.country_data * Country.country_data)
 end
