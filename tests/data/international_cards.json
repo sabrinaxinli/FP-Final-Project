@@ -1,0 +1,14 @@
+[
+  {
+    "player" : "Facilitator",
+    "card_type" : ["INTERNATIONAL_EVENT"],
+    "title" : "Conflict Event - India-Pakistani Tensions",
+    "description" : "A dramatic terrorist attack on the Indian Parliament captures global headlines. The attack is traced back to a Pakistani militant group with links to the Directorate of INter-Service Intelligence (ISI). There is continuing combat involving Pakistani ISI-supported groups and INdian military and paramilitary forces in Jammu and Kashmir. This complicates US counter-terrorism (CT) operations in Afghanistan. CHina has an opportunity to support Pakistan.",
+    "card_number" : "EVT-CON-16",
+    "involved" : ["US", "PRC"],
+    "aor" : "INDOPACOM_PRC",
+    "public" : true,
+	"play_cost": 0,
+    "replayable" : false
+  }
+]

@@ -1,0 +1,25 @@
+[{
+	"player" : "PRC",
+	"card_type" : ["ACTION"],
+	"title" : "Gray Zone Pressure on INDOPACOM",
+	"description" : "China is applying gray zone pressure on INDOPACOM. US must respond.",
+	"card_number" : "PRC-01",
+	"involved" : ["US", "PRC"],
+	"aor" : "INDOPACOM_PRC",
+	"public": true,
+	"play_cost" : 3,
+	"replayable" : false
+},
+{
+	"player" : "PRC",
+	"card_type" : ["INVESTMENT"],
+	"title" : "SCS Expansion: Reclaim and occupy another SCS island",
+	"description" : "China can expand and reclaim another SCS island to acquire new resources",
+	"card_number" : "PRC-22",
+	"involved" : ["PRC"],
+	"aor" : "INDOPACOM_PRC",
+	"public": true,
+	"play_cost" : 4,
+	"replayable" : true
+  }
+]

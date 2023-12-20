@@ -63,6 +63,9 @@ let force_equal (f1 : force) (f2 : force) : bool =
   Int.equal f1.modernization_level f2.modernization_level && 
   Int.equal f1.readiness f2.readiness
 
+let equal_and_greater_force (f1: force) (f2: force) : bool =
+  (force_equal f1 f2) && (f1.force_factor >= f2.force_factor)
+
 type aor_map = (force list) AORMap.t (*force factor x modernization level x readiness *)
 
 let aor_map_to_yojson (m: aor_map) : Yojson.Safe.t =
@@ -137,7 +140,7 @@ module CountryImpl : Country = struct
 
   let has_force (cd : t) (region: string) (troop: force) : bool =
     let open Option.Let_syntax in
-    match (get_force_in_region cd region) >>= List.find ~f:(fun force -> force_equal troop force) with
+    match (get_force_in_region cd region) >>= List.find ~f:(fun force -> equal_and_greater_force force troop) with
       | Some _ -> true
       | None -> false
 
@@ -234,9 +237,6 @@ module CountryImpl : Country = struct
     let open Option.Let_syntax in
     Resolution.ActionCostImpl.get_cost res_tables action_type key >>=
     (fun cost -> if cd.parameters.resources >= cost then Some cost else None)
-
-  (* let get_combat_factors (cd : t) : int = *)
-
 
 end
 

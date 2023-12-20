@@ -5,6 +5,13 @@
  (preprocess
   (pps ppx_jane)))
 
+(test
+(name game_tests)
+(modules game_tests)
+(libraries ounit2 core game country)
+(preprocess
+ (pps ppx_jane)))
+
 ; (test
 ;  (name server_tests)
 ;  (modules server_tests)

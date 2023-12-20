@@ -1,0 +1,83 @@
+[
+  {
+    "name": "US",
+	"home_region" : "CONUS",
+    "parameters": {
+        "modifier": 20,
+        "national_tech_level": 4,
+        "resources": 40,
+        "per_turn_resources": 30,
+        "influence_points": 50
+    },
+    "critical_capabilities": {
+      "lrf": 0,
+      "c4isr": 3,
+      "iamd_bmd": 3,
+      "sof": 3,
+      "nuclear_forces": 0
+    },
+    "forces": {
+      "CONUS" : [{
+        "force_factor" : 14,
+        "modernization_level" : 3,
+        "readiness": 10,
+        "pinned" : 0
+      }],
+      "INDOPACOM_PRC": [{
+        "force_factor" : 1,
+        "modernization_level" : 3,
+        "readiness": 10,
+        "pinned" : 0
+      },
+	  {
+        "force_factor" : 1,
+        "modernization_level" : 3,
+        "readiness": 2,
+        "pinned" : 0
+      }]
+    }
+    ,
+    "npc": false,
+    "affiliation": ["BLUE"]
+  },
+  {
+      "name": "PRC",
+	  "home_region": "INDOPACOM_PRC",
+      "parameters": {
+          "modifier": 15,
+          "national_tech_level": 4,
+          "resources": 15,
+          "per_turn_resources": 4,
+          "influence_points": 5
+      },
+      "critical_capabilities": {
+          "lrf": 4,
+          "c4isr": 3,
+          "iamd_bmd": 0,
+          "sof": 0,
+          "nuclear_forces": 0
+      },
+      "forces": {
+        "INDOPACOM_PRC": [{
+          "force_factor" : 5,
+          "modernization_level" : 1,
+          "readiness": 10,
+          "pinned" : 0
+        },
+        {
+          "force_factor" : 5,
+          "modernization_level" : 2,
+          "readiness": 10,
+          "pinned" : 0
+        },
+        {
+          "force_factor" : 5,
+          "modernization_level" : 3,
+          "readiness": 10,
+          "pinned" : 0
+        }]
+      },
+      "npc": true,
+      "affiliation": ["RED"]
+  }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "player" : "Facilitator",
+    "card_type" : ["DOMESTIC_EVENT"],
+    "title" : "Research Failure (LRF)",
+    "description" : "Problems with rocket motor tests and overly ambitious technical milesetones create problems for China's next generation LRF program. Delays and costs overruns cast doubt on China's ability to move forward in this area.",
+    "card_number" : "EVT-PRC-02",
+    "involved" : ["PRC"],
+    "aor" : "INDOPACOM_PRC",
+	"public" : null,
+    "play_cost" : 4,
+    "replayable" : true
+  }
+]

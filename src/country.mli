@@ -41,6 +41,7 @@ val critical_capabilities_of_yojson : Yojson.Safe.t -> (critical_capabilities, s
 module AreaKey : sig
   type t
   val of_string : string -> t option
+  val of_string_exn : string -> t
   val to_string : t -> string
   val is_region: string -> bool
 end
@@ -59,7 +60,7 @@ val force_equal: force -> force -> bool
 val force_to_yojson: force -> Yojson.Safe.t
 val force_of_yojson: Yojson.Safe.t -> (force, string) result
 
-type aor_map
+type aor_map = (force list) AORMap.t
 
 val aor_map_to_yojson: aor_map -> Yojson.Safe.t
 val aor_map_of_yojson: Yojson.Safe.t -> (aor_map, string) result

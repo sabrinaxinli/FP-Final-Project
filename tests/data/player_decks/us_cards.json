@@ -1,0 +1,14 @@
+[
+  {
+    "player" : "US",
+    "card_type" : ["ACTION"],
+    "title" : "US Card text",
+    "description" : "US can do something.",
+    "card_number" : "US-01",
+    "involved" : ["US","PRC"],
+    "aor" : "CONUS",
+    "public": null,
+    "play_cost" : 3,
+    "replayable" : false
+  }
+]

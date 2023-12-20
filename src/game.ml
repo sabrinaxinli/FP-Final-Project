@@ -1,11 +1,3 @@
-(* module type VictoryCondition : sig
-    type Player
-    type IP
-    val check_for_victory : (Player * IP) List -> (Player * Bool) List
-end
-
-module Create_victory_condition : VictoryCondition *)
-
 open Core
 
 type card_type = ACTION | INVESTMENT | DOMESTIC_EVENT | INTERNATIONAL_EVENT [@@deriving yojson]
@@ -31,6 +23,9 @@ module StringMap = Map.Make(String)
 
 
 type player_country_map = Country.country_data StringMap.t
+
+let get_current_countries (map : player_country_map) : string list =
+  Map.keys map
 
 type proposed_action =
   | PlayCards of string
@@ -67,9 +62,9 @@ module type Deck = sig
   type t = card
   type m = card_mapping
 
-  val load_cards: string -> t list (* Will contain logic for data loading for cards from specified path *)
-  val get_size: t list -> int
-  val sorted_by: t list -> string -> t list (* string contains info to be sorted by *)
+  val load_cards: string -> t list
+	val get_size: t list -> int
+  val sorted_by: t list -> string -> t list
   val build_card_mappings: unit -> m
   val get_card_function: m -> string -> card_function
 
@@ -95,10 +90,11 @@ module DeckImpl : Deck = struct
   let get_size (card_list: t list) : int =
     List.length card_list
 
-  (* Implement later *)
+  (* TO BE IMPLEMENTED*)
   let sorted_by (card_list: t list) (_: string) : t list =
     card_list
 
+  (* Helper function for checking if a player responded *)
   (* let empty_action (prm: player_responses_map) (player_name : string) : bool =
     List.length (Map.find_exn prm player_name) = 1 *)
 
@@ -119,28 +115,20 @@ module DeckImpl : Deck = struct
 end
 
 module type GameState = sig
-  type t
+  type t = game_data
   (* Handle game loadup and config files and building the inital game_data record *)
   val start_game: countries_fp : string -> player_decks_dir : string -> domestic_fp: string -> int_fp: string -> t
-  (* Play the entire signaling phase *)
-  (* val play_signaling_phase: t -> t (* game_data -> turn_stage -> game_data *)
-  (* Get a red signal from one player *)
-  val get_red_signal: t -> string -> card list
-  (* gamestate_data -> country_name -> game_data *)
-  val play_investments_actions_phase: t -> string -> t *)
   (* Budget fluctuations and give round of resources to all players *)
   val update_resource_allocations: t -> t
-  (* Red signaling -> Blue investments / action -> Red investments / action -> ... *)
-  (* val get_turn_stage: t -> string *)
   (* Get a proposed action from a player, asking again until the proposed action is valid *)
   val get_proposed_action: t -> string -> validator : (t -> string -> proposed_action -> int option) -> proposed_action * int
   (* Validate the proposed action *)
   val validate_action: t -> string -> proposed_action -> int option
   (* Validate specifically the proposed action in response to a played card *)
   val validate_response: t -> string -> proposed_action -> int option
+  (* Based on gamestate, player name, and the proposed action of this player, and the previously computed cost of the action, enact this action and
+	 get new gamestate *)
   val enact_action: t -> string -> proposed_action -> int -> t
-  (* Play a card, let all involved players respond, and evaluate card result. *)
-  (* val play_card : t -> card -> t *)
 
 end
 
@@ -155,7 +143,8 @@ module GameStateImpl : GameState = struct
         let deck_dirs = Sys_unix.readdir player_decks_dir in
         let decks = 
           List.fold (Array.to_list deck_dirs) ~init:StringMap.empty ~f:(fun map deck_dir ->
-            let card_list = DeckImpl.load_cards deck_dir in
+            let full_deck_dir = Filename.concat player_decks_dir deck_dir in
+            let card_list = DeckImpl.load_cards full_deck_dir in
             List.fold card_list ~init:map ~f:(fun acc c -> 
               Map.update acc c.player ~f:(function
                 | None -> [c]
@@ -166,11 +155,12 @@ module GameStateImpl : GameState = struct
       with
       | Sys_error err -> failwith ("Could not access player_decks_dir: " ^ err)
     in
-    
+    let domestic_deck = DeckImpl.load_cards domestic_fp in
+    let international_deck = DeckImpl.load_cards int_fp in
     {countries = List.fold country_datas ~init:StringMap.empty ~f:(fun map x -> Map.add_exn map ~key:x.name ~data:x);
     player_decks = player_decks;
-    domestic_event_deck = DeckImpl.load_cards domestic_fp;
-    international_event_deck = DeckImpl.load_cards int_fp;
+    domestic_event_deck = domestic_deck;
+    international_event_deck = international_deck;
     victory_conditions = StringMap.empty;
     current_turn = "Red Signalling";
     resolution_tables = resolutions}
@@ -187,7 +177,7 @@ module GameStateImpl : GameState = struct
       | Some cost -> (player_response, cost)
       | None -> get_proposed_action gs player_name ~validator
 
-  (* Helpers *)
+  (* --- Helpers for validation ----- *)
   let validate_card (player_country: Country.country_data) (player_deck : card list) (card_num : string) : int option =
     let open Option.Let_syntax in
     List.find player_deck ~f:(fun c -> String.equal c.card_number card_num) >>=
@@ -215,13 +205,15 @@ module GameStateImpl : GameState = struct
       Some 0
     else
       None
-
+  
+  (* Helper function for getting the readiness cost for US player buyback *)
   let get_readiness_cost (player_country: Country.country_data) (region: string) (troops : Country.force list) (readiness: int): int =
     let total_troops = List.fold troops ~init:0 ~f:(fun acc x -> acc + x.force_factor) in
     if String.equal player_country.name "US" then
         if String.equal region "CONUS" then 
           (total_troops + readiness) 
-        else int_of_float (Float.round_up (float_of_int total_troops *. 1.3) +. Float.round_down (float_of_int readiness *. 1.2))
+        else 
+          int_of_float (Float.round_up (float_of_int total_troops *. 1.3) +. Float.round_down (float_of_int readiness *. 1.2))
     else
       total_troops
   
@@ -230,6 +222,8 @@ module GameStateImpl : GameState = struct
       Some (get_readiness_cost player_country region unreadied_troops readiness)
     else
       None
+
+  (* ------ End helper functions for validation *)
   
   (* Separating out functionality for validation and enaction to allow for future expansion of facilitator role *)
   let validate_action (gs: t) (player: string) (act : proposed_action) : int option =
@@ -254,7 +248,7 @@ module GameStateImpl : GameState = struct
   let enact_action (gs: t) (player : string) (act : proposed_action) (cost : int): t =
     let player_country = Map.find_exn gs.countries player in
     match act with
-      | PlayCards _ -> gs (* play_card gs c *)
+      | PlayCards _ -> gs (* TO BE IMPLEMENTED - add play_card functionality *)
       | ProcureForce (region, force) ->
           let updated_player = Country.CountryImpl.procure_forces player_country region force cost in
           {gs with countries = Map.update gs.countries player ~f:(function | Some _ -> updated_player | None -> failwith "player must exist for procurement")}
@@ -270,7 +264,7 @@ module GameStateImpl : GameState = struct
           {gs with countries = Map.update gs.countries player ~f:(function | Some _ -> updated_player | None -> failwith "player must exist for buyback")}
       | Done -> gs
 
-
+  (* Code stub for play_card - TO BE IMPLEMENTED *)
   (* let play_card (curr_state : t) (c : card): t =
     List.fold c.involved ~init:(curr_state, PlayerCountryMap.empty) ~f:(fun (state, response_map) player_name ->
       (* Add code for getting multiple response actions from each player *)
