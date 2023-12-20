@@ -155,12 +155,10 @@ module GameStateImpl : GameState = struct
       with
       | Sys_error err -> failwith ("Could not access player_decks_dir: " ^ err)
     in
-    let domestic_deck = DeckImpl.load_cards domestic_fp in
-    let international_deck = DeckImpl.load_cards int_fp in
     {countries = List.fold country_datas ~init:StringMap.empty ~f:(fun map x -> Map.add_exn map ~key:x.name ~data:x);
     player_decks = player_decks;
-    domestic_event_deck = domestic_deck;
-    international_event_deck = international_deck;
+    domestic_event_deck = DeckImpl.load_cards domestic_fp;
+    international_event_deck = DeckImpl.load_cards int_fp;
     victory_conditions = StringMap.empty;
     current_turn = "Red Signalling";
     resolution_tables = resolutions}
